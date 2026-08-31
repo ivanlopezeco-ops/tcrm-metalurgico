@@ -250,11 +250,39 @@ def pesos_moviles(df: pd.DataFrame, ventana: int) -> tuple[pd.DataFrame, pd.Seri
     return w, cobertura.dropna()
 
 
-def a_diario(w: pd.DataFrame, dias: pd.DatetimeIndex) -> pd.DataFrame:
+# El empalme extiende la serie hacia atras congelando el primer vector de
+# ponderadores disponible. Es necesario porque la base de comercio arranca en
+# 2002-01 y, con media movil de 12 meses mas el rezago del criterio BCRA, el
+# indice no podria empezar antes de 2003-02, mientras que los bilaterales
+# llegan a 1997.
+#
+# El costo esta medido, no supuesto: repitiendo el ejercicio sobre el ITCRM
+# del BCRA, congelar el vector de dic-2002 hacia atras da 1,43% de error medio
+# y 3,27% maximo, decreciente hacia el punto de empalme (2,7% en 1997-98,
+# menos de 0,6% en 2001-02). Es chico porque justamente ese tramo es el mas
+# estable de toda la serie: la distancia entre el vector del BCRA de 1997-01 y
+# el de 2002-12 es 7,5%, contra 22,5% entre 2002-12 y hoy. El gran corrimiento
+# fue el ascenso de China, posterior a 2003.
+#
+# El tramo empalmado responde a que competitividad habria enfrentado el sector
+# si hubiera comerciado como en 2002, y debe marcarse como tal al publicar.
+EMPALMAR = True
+
+
+def a_diario(w: pd.DataFrame, dias: pd.DatetimeIndex,
+             empalmar: bool = EMPALMAR) -> pd.DataFrame:
     """La ventana que cierra en el mes M rige desde el primer dia de M+2."""
     d = w.copy()
     d.index = (w.index + 2).to_timestamp()
-    return d.reindex(d.index.union(dias)).ffill().reindex(dias).dropna(how="all")
+    d = d.reindex(d.index.union(dias)).ffill()
+    if empalmar:
+        d = d.bfill()          # congela el primer vector hacia atras
+    return d.reindex(dias).dropna(how="all")
+
+
+def inicio_empalme(w: pd.DataFrame) -> pd.Timestamp:
+    """Fecha desde la cual los ponderadores son propios y no empalmados."""
+    return (w.index.min() + 2).to_timestamp()
 
 
 def construir():
@@ -272,7 +300,11 @@ def construir():
                          "ventana": ventana,
                          "peso_rubro": sub["valor"].sum() / total,
                          "cobertura": float(cob.iloc[-1]),
-                         "publicable": float(cob.iloc[-1]) >= UMBRAL_COBERTURA})
+                         "publicable": float(cob.iloc[-1]) >= UMBRAL_COBERTURA,
+                         "ponderadores_propios_desde": str(inicio_empalme(w).date()),
+                         "tramo_empalmado": "1997-01 a "
+                                            + str((inicio_empalme(w) - pd.Timedelta(days=1)).date())
+                                            if EMPALMAR else ""})
 
         agregar(f"{lado} total", df, "total")
         for fam, rubros in FAMILIAS[lado].items():
