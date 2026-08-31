@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from tcrm_v3 import (ARCHIVOS, FAMILIAS, VENTANA_DEFECTO, VENTANAS,
+from tcrm_v3 import (ARCHIVOS, FAMILIAS, VENTANA_DEFECTO, VENTANAS, construir,
                      leer_base, matriz_bilaterales, pesos_moviles)
 
 BASE = Path(__file__).resolve().parent
@@ -57,10 +57,33 @@ def datos() -> dict:
                     VENTANAS.get(rubro, VENTANA_DEFECTO))
         presets[lado] = entradas
 
+    # Series oficiales precalculadas, con ponderadores moviles. El navegador
+    # solo puede recalcular con un vector fijo, asi que para los presets se
+    # muestran estas y el calculo en vivo queda para las canastas a medida.
+    _, diario, _ = construir()
+    # Se reindexan sobre el MISMO eje temporal que los bilaterales: el indice
+    # arranca en 2003 (limitado por la base de comercio) y los bilaterales en
+    # 1997, asi que sin esto el navegador dibujaria las series corridas.
+    eje_m = bil.resample("ME").mean().index
+    eje_d = bil.loc["2015-11-01":].index
+    men = diario.resample("ME").mean().reindex(eje_m)
+    dia = diario.reindex(eje_d)
+    oficiales = {
+        "mensual": {c: [None if pd.isna(v) else round(v, 3) for v in men[c]]
+                    for c in men.columns if c != "ITCRM BCRA"},
+        "diario": {c: [None if pd.isna(v) else round(v, 3) for v in dia[c]]
+                   for c in dia.columns if c != "ITCRM BCRA"},
+    }
+
     return {
         "grupos": grupos,
+        "oficiales": oficiales,
         "mensual": empaquetar(bil.resample("ME").mean(), ofi.resample("ME").mean()),
-        "diario": empaquetar(bil.loc["2024-01-01":], ofi.loc["2024-01-01":]),
+        # el bloque diario arranca antes de la base (17-dic-2015) para que el
+        # navegador pueda anclar exactamente ahi: ese dia es la salida del
+        # cepo, el salto diario mas grande de la serie, y anclar en el
+        # promedio de diciembre en vez del dia exacto desvia 17%
+        "diario": empaquetar(bil.loc["2015-11-01":], ofi.loc["2015-11-01":]),
         "presets": presets,
         "actualizado": pd.Timestamp.today().strftime("%Y-%m-%d"),
     }
