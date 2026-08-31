@@ -202,18 +202,83 @@ function pesosSector(){
   return s>0? w.map(v=>v/s) : null;
 }
 function set(){ return rango==='diario'? D.diario : D.mensual; }
-function serie(w){
-  const s=set(); if(!w) return null;
-  const n=s.fechas.length, y=new Array(n);
+function encadenar(s,w){
+  // Laspeyres geometrico encadenado, renormalizando en cada periodo sobre los
+  // socios con dato. Sin esto, un socio que entra tarde (Rusia arranca en 2015)
+  // recorta toda la serie previa. Es la misma logica que usa el calculo en
+  // Python que genera los CSV.
+  if(!w) return null;
+  const n=s.fechas.length, y=new Array(n).fill(null);
+  const col=G.map(g=>s.bil[g]);
+  let acum=0, arranco=false;
   for(let t=0;t<n;t++){
-    let acc=0, ok=true;
-    for(let j=0;j<G.length;j++){
-      if(w[j]===0) continue;
-      const v=s.bil[G[j]][t];
-      if(v==null||v<=0){ok=false;break;}
-      acc+=w[j]*Math.log(v);
+    if(t>0){
+      let d=0, pw=0;
+      for(let j=0;j<G.length;j++){
+        if(w[j]===0) continue;
+        const a=col[j][t-1], b=col[j][t];
+        if(a==null||b==null||a<=0||b<=0) continue;
+        d+=w[j]*(Math.log(b)-Math.log(a)); pw+=w[j];
+      }
+      if(pw>0){ acum+=d/pw; arranco=true; }
     }
-    y[t]=ok?Math.exp(acc):null;
+    let hay=false;
+    for(let j=0;j<G.length;j++){ if(w[j]>0 && col[j][t]!=null){ hay=true; break; } }
+    if(hay && (arranco||t===0)) y[t]=Math.exp(acum);
+  }
+  return y;
+}
+
+// Encadenar da una serie sin nivel: hay que anclarla. La base del BCRA es el
+// 17-dic-2015, que es el dia de la salida del cepo y el mayor salto diario de
+// toda la serie. Anclar el mensual en el promedio de diciembre en lugar del
+// dia exacto desviaba 17%. Por eso el mensual se engancha al diario, que si
+// puede anclarse en la fecha exacta.
+function pesosActuales(){ return modo==='sector' ? pesosSector() : norm(ventas); }
+
+// Nombre de la serie oficial que corresponde al preset elegido, si es que
+// corresponde alguna: solo en modo sector, sin socios apagados.
+function claveOficial(){
+  if(modo!=='sector' || apagados.size) return null;
+  const n = preset==='Total del intercambio' ? lado+' total' : lado+' - '+preset;
+  const o = D.oficiales && D.oficiales[rango==='diario'?'diario':'mensual'];
+  return (o && o[n]) ? n : null;
+}
+
+function serie(w){
+  // Los presets muestran la serie oficial, calculada con ponderadores moviles.
+  // El calculo en vivo del navegador usa un vector fijo, asi que se reserva
+  // para las canastas a medida, donde no hay serie precalculada posible.
+  const k=claveOficial();
+  if(k) return D.oficiales[rango==='diario'?'diario':'mensual'][k];
+  const s=set();
+  return anclar(encadenar(s,w), s.fechas, rango==='diario');
+}
+
+function anclar(y, fechas, esDiario){
+  if(!y) return y;
+  if(esDiario){
+    let i=fechas.indexOf('2015-12-17');
+    if(i<0||y[i]==null) for(let t=0;t<fechas.length;t++) if(fechas[t]>='2015-12-17'&&y[t]!=null){i=t;break;}
+    if(i<0||y[i]==null) return y;
+    const k=100/y[i];
+    return y.map(v=>v==null?null:v*k);
+  }
+  // mensual: se calcula la misma canasta en diario, ya anclada, y se compara
+  // en un mes de solape
+  const d=D.diario, w=pesosActuales();
+  const yd=anclar(encadenar(d,w), d.fechas, true);
+  if(!yd) return y;
+  const prom={};
+  d.fechas.forEach((f,t)=>{ if(yd[t]==null) return;
+    const m=f.slice(0,7); (prom[m]=prom[m]||[]).push(yd[t]); });
+  for(let t=0;t<fechas.length;t++){
+    const m=fechas[t].slice(0,7);
+    if(y[t]!=null && prom[m] && m>='2016-01'){
+      const ref=prom[m].reduce((a,b)=>a+b,0)/prom[m].length;
+      const k=ref/y[t];
+      return y.map(v=>v==null?null:v*k);
+    }
   }
   return y;
 }
