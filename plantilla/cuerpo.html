@@ -1,0 +1,455 @@
+<style>
+:root{
+  --tinta:#0E151B; --panel:#151E26; --panel2:#1B2731; --regla:#25333F;
+  --texto:#DFE7ED; --tenue:#7D8E9C; --debil:#4E5F6C;
+  --colado:#FF7A2F; --patina:#4FB8A8; --alerta:#D9A441; --acero:#8FA8BC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--tinta);color:var(--texto);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+#app{max-width:1240px;margin:0 auto;padding:26px 20px 60px}
+
+.cab{display:flex;flex-wrap:wrap;align-items:flex-end;gap:26px;
+  padding-bottom:16px;border-bottom:1px solid var(--regla);margin-bottom:18px}
+.marca{flex:1 1 250px}
+.marca h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:25px;
+  font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+.marca p{color:var(--tenue);font-size:12.5px;margin-top:3px}
+.lectura{display:flex;gap:24px;flex-wrap:wrap}
+.dato .k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--tenue);display:block;margin-bottom:2px}
+.dato .v{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;line-height:1}
+.dato .v.chico{font-size:19px}
+.colado{color:var(--colado)} .patina{color:var(--patina)} .acero{color:var(--acero)}
+
+/* modos */
+.modos{display:flex;gap:0;border:1px solid var(--regla);border-radius:3px;
+  overflow:hidden;margin-bottom:18px;max-width:420px}
+.modos button{flex:1;background:transparent;border:0;color:var(--tenue);cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.07em;
+  text-transform:uppercase;padding:9px 0;transition:.15s}
+.modos button[aria-pressed="true"]{background:var(--panel2);color:var(--texto)}
+.modos button:focus-visible{outline:2px solid var(--colado);outline-offset:-2px}
+
+.grilla{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+@media(max-width:880px){.grilla{grid-template-columns:1fr}}
+.caja{background:var(--panel);border:1px solid var(--regla);border-radius:3px}
+.caja+.caja{margin-top:16px}
+.caja h2{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--tenue);
+  padding:11px 14px;border-bottom:1px solid var(--regla)}
+.cuerpo{padding:12px 14px}
+
+.lados{display:flex;border:1px solid var(--regla);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.lados button{flex:1;background:transparent;border:0;color:var(--tenue);cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.07em;
+  text-transform:uppercase;padding:8px 0;transition:.15s}
+.lados button[aria-pressed="true"]{background:var(--panel2);color:var(--texto)}
+.lados button:focus-visible{outline:2px solid var(--colado);outline-offset:-2px}
+
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--debil);margin:14px 0 6px}
+.eyebrow:first-child{margin-top:0}
+
+.opcion{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;
+  background:transparent;border:0;color:var(--texto);cursor:pointer;padding:6px 8px;
+  border-radius:2px;font-size:13px;transition:.12s}
+.opcion:hover{background:var(--panel2)}
+.opcion[aria-pressed="true"]{background:var(--panel2);box-shadow:inset 2px 0 0 var(--colado)}
+.opcion:focus-visible{outline:1px solid var(--colado)}
+.opcion .pz{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--debil)}
+
+.paises{display:flex;flex-direction:column;gap:1px}
+.pais{display:grid;grid-template-columns:16px 1fr auto;align-items:center;gap:8px;
+  padding:5px 8px;border-radius:2px;cursor:pointer;transition:.12s}
+.pais:hover{background:var(--panel2)}
+.pais input{appearance:none;width:12px;height:12px;border:1px solid var(--debil);
+  border-radius:2px;cursor:pointer;position:relative}
+.pais input:checked{background:var(--colado);border-color:var(--colado)}
+.pais input:checked::after{content:"";position:absolute;inset:3px;background:var(--tinta);border-radius:1px}
+.pais input:focus-visible{outline:2px solid var(--colado);outline-offset:2px}
+.pais.apagado{color:var(--debil)}
+.pais .n{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pais .w{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--tenue)}
+.pais.apagado .w{color:var(--debil)}
+
+/* canasta de empresa */
+.canasta{display:flex;flex-direction:column;gap:2px}
+.fila{display:grid;grid-template-columns:1fr 62px 42px;align-items:center;gap:8px;
+  padding:3px 4px;border-radius:2px}
+.fila:hover{background:var(--panel2)}
+.fila .n{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila.cero .n{color:var(--debil)}
+.fila input{background:var(--tinta);border:1px solid var(--regla);color:var(--texto);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px 6px;
+  border-radius:2px;width:100%;text-align:right}
+.fila input:focus{outline:0;border-color:var(--colado)}
+.fila.cero input{color:var(--debil)}
+.fila .pc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--tenue);text-align:right}
+.suma{display:flex;justify-content:space-between;margin-top:10px;padding-top:9px;
+  border-top:1px solid var(--regla);font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+.suma .t{color:var(--tenue)} .suma .v{color:var(--texto)}
+.suma.mal .v{color:var(--alerta)}
+
+.acciones{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.acciones button{flex:1 1 auto;background:transparent;border:1px solid var(--regla);
+  color:var(--tenue);font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:.05em;text-transform:uppercase;padding:6px 8px;border-radius:2px;
+  cursor:pointer;transition:.12s}
+.acciones button:hover{border-color:var(--debil);color:var(--texto)}
+.acciones button:focus-visible{outline:2px solid var(--colado)}
+
+.barra{display:flex;height:32px;border:1px solid var(--regla);border-radius:2px;
+  overflow:hidden;background:var(--panel2)}
+.seg{transition:flex-grow .45s cubic-bezier(.4,0,.2,1);min-width:0;
+  display:flex;align-items:center;justify-content:center}
+.seg span{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tinta);
+  font-weight:600;white-space:nowrap;overflow:hidden}
+.leyenda{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:9px}
+.leyenda div{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--tenue)}
+.leyenda i{width:8px;height:8px;border-radius:1px;display:block}
+.leyenda b{font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--texto)}
+
+.gcab{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  flex-wrap:wrap;padding:11px 14px;border-bottom:1px solid var(--regla)}
+.gcab h2{padding:0;border:0}
+.rangos{display:flex;gap:4px}
+.rangos button{background:transparent;border:1px solid var(--regla);color:var(--tenue);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 9px;
+  border-radius:2px;cursor:pointer;transition:.12s}
+.rangos button[aria-pressed="true"]{background:var(--panel2);color:var(--texto);border-color:var(--debil)}
+.rangos button:focus-visible{outline:2px solid var(--colado)}
+canvas{display:block;width:100%;height:330px}
+@media(max-width:600px){canvas{height:240px}}
+.claves{display:flex;gap:16px;flex-wrap:wrap;padding:0 14px 12px;font-size:11.5px;color:var(--tenue)}
+.claves div{display:flex;align-items:center;gap:6px}
+.claves i{width:14px;height:2px;display:block}
+
+.nota{margin-top:10px;padding:9px 12px;border-left:2px solid var(--alerta);
+  background:rgba(217,164,65,.07);font-size:12px;color:var(--tenue);border-radius:0 2px 2px 0}
+.nota b{color:var(--alerta);font-weight:500}
+.nota.info{border-color:var(--acero);background:rgba(143,168,188,.06)}
+.nota.info b{color:var(--acero)}
+.pie{margin-top:20px;font-size:11.5px;color:var(--debil);line-height:1.65}
+.pie code{font-family:'IBM Plex Mono',monospace;color:var(--tenue)}
+.pie+.pie{margin-top:8px}
+</style>
+
+<script>
+(function(){
+const D=window.DATOS, G=D.grupos;
+const PAL=['#FF7A2F','#E8894A','#C98F5E','#A8926E','#87927C','#6B9088','#4FB8A8',
+           '#4A9AA0','#457E93','#42687F','#3E5468','#3A4552','#333B44'];
+
+let modo='sector', lado='IMPO', preset='Total del intercambio',
+    apagados=new Set(), rango='10a',
+    ventas=Object.fromEntries(G.map(g=>[g,0])),
+    compras=Object.fromEntries(G.map(g=>[g,0]));
+
+const $=s=>document.querySelector(s);
+document.getElementById('app').innerHTML=`
+<header class="cab">
+  <div class="marca">
+    <h1>Tipo de cambio real metalúrgico</h1>
+    <p>Bilaterales del BCRA reponderados · base 17-dic-2015 = 100</p>
+  </div>
+  <div class="lectura" id="lectura"></div>
+</header>
+
+<div class="modos" role="group">
+  <button id="mSector" aria-pressed="true">Sector</button>
+  <button id="mEmpresa" aria-pressed="false">Mi empresa</button>
+</div>
+
+<div class="grilla">
+  <aside id="panel"></aside>
+  <main>
+    <div class="caja">
+      <div class="gcab">
+        <h2>Serie</h2>
+        <div class="rangos" role="group">
+          <button data-r="3a">3 años</button>
+          <button data-r="10a" aria-pressed="true">10 años</button>
+          <button data-r="todo">1997–hoy</button>
+          <button data-r="diario">Diario 2024–hoy</button>
+        </div>
+      </div>
+      <div class="cuerpo"><canvas id="lienzo"></canvas></div>
+      <div class="claves" id="claves"></div>
+    </div>
+    <div class="caja" id="cajaBarra">
+      <h2 id="tBarra">Vector de ponderadores</h2>
+      <div class="cuerpo">
+        <div class="barra" id="barra"></div>
+        <div class="leyenda" id="leyenda"></div>
+        <div id="aviso"></div>
+      </div>
+    </div>
+    <div id="pies"></div>
+  </main>
+</div>`;
+
+/* ---------- calculo ---------- */
+function norm(obj){
+  const v=G.map(g=>Math.max(0,+obj[g]||0)), s=v.reduce((a,b)=>a+b,0);
+  return s>0? v.map(x=>x/s) : null;
+}
+function pesosSector(){
+  const base=D.presets[lado][preset].w;
+  const w=base.map((v,i)=>apagados.has(G[i])?0:v);
+  const s=w.reduce((a,b)=>a+b,0);
+  return s>0? w.map(v=>v/s) : null;
+}
+function set(){ return rango==='diario'? D.diario : D.mensual; }
+function serie(w){
+  const s=set(); if(!w) return null;
+  const n=s.fechas.length, y=new Array(n);
+  for(let t=0;t<n;t++){
+    let acc=0, ok=true;
+    for(let j=0;j<G.length;j++){
+      if(w[j]===0) continue;
+      const v=s.bil[G[j]][t];
+      if(v==null||v<=0){ok=false;break;}
+      acc+=w[j]*Math.log(v);
+    }
+    y[t]=ok?Math.exp(acc):null;
+  }
+  return y;
+}
+function corte(){
+  const s=set();
+  if(rango==='diario'||rango==='todo') return 0;
+  const c=new Date(); c.setFullYear(c.getFullYear()-(rango==='3a'?3:10));
+  const i=s.fechas.findIndex(d=>d>=c.toISOString().slice(0,10));
+  return i<0?0:i;
+}
+const ult=a=>{ if(!a) return null; for(let i=a.length-1;i>=0;i--) if(a[i]!=null) return a[i]; return null; };
+
+/* ---------- grafico ---------- */
+const cv=$('#lienzo'), cx=cv.getContext('2d');
+let lineas=[], fechas=[];
+function dibujar(){
+  const dpr=devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
+  cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0); cx.clearRect(0,0,W,H);
+  const m={t:14,r:12,b:26,l:44}, pw=W-m.l-m.r, ph=H-m.t-m.b;
+  const todos=lineas.flatMap(l=>l.y).filter(v=>v!=null);
+  if(!todos.length||fechas.length<2){
+    cx.fillStyle='#4E5F6C'; cx.font="12px 'IBM Plex Mono',monospace"; cx.textAlign='center';
+    cx.fillText('Cargá al menos un socio con peso mayor a cero', W/2, H/2); return;
+  }
+  let lo=Math.min(...todos), hi=Math.max(...todos);
+  const p=(hi-lo)*0.10||5; lo-=p; hi+=p;
+  const X=i=>m.l+(i/(fechas.length-1))*pw, Y=v=>m.t+(1-(v-lo)/(hi-lo))*ph;
+  cx.strokeStyle='#25333F'; cx.lineWidth=1; cx.fillStyle='#4E5F6C';
+  cx.font="10px 'IBM Plex Mono',monospace"; cx.textAlign='right';
+  for(let k=0;k<=4;k++){
+    const v=lo+(hi-lo)*k/4, y=Math.round(Y(v))+.5;
+    cx.beginPath(); cx.moveTo(m.l,y); cx.lineTo(W-m.r,y); cx.stroke();
+    cx.fillText(v.toFixed(0), m.l-7, y+3);
+  }
+  if(lo<100&&hi>100){
+    const y=Math.round(Y(100))+.5;
+    cx.save(); cx.setLineDash([3,4]); cx.strokeStyle='#4E5F6C';
+    cx.beginPath(); cx.moveTo(m.l,y); cx.lineTo(W-m.r,y); cx.stroke(); cx.restore();
+  }
+  cx.textAlign='center';
+  const paso=Math.max(1,Math.floor(fechas.length/6));
+  for(let i=0;i<fechas.length;i+=paso)
+    cx.fillText(fechas.length>400?fechas[i].slice(0,4):fechas[i].slice(0,7), X(i), H-8);
+  lineas.forEach(l=>{
+    cx.strokeStyle=l.c; cx.lineWidth=l.w||2; cx.lineJoin='round';
+    if(l.d) cx.setLineDash(l.d); else cx.setLineDash([]);
+    cx.beginPath(); let mov=true;
+    l.y.forEach((v,i)=>{ if(v==null){mov=true;return;}
+      const x=X(i), y=Y(v); if(mov){cx.moveTo(x,y);mov=false;} else cx.lineTo(x,y); });
+    cx.stroke(); cx.setLineDash([]);
+  });
+}
+
+/* ---------- barra ---------- */
+function pintarBarra(w,titulo){
+  $('#tBarra').textContent=titulo;
+  const seg=w? G.map((g,i)=>[g,w[i]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]) : [];
+  $('#barra').innerHTML=seg.map(([g,v],k)=>
+    `<div class="seg" style="flex:${v} 0 0;background:${PAL[k%PAL.length]}"
+      title="${g}: ${(v*100).toFixed(1)}%"><span>${v>0.07?(v*100).toFixed(0):''}</span></div>`).join('');
+  $('#leyenda').innerHTML=seg.slice(0,8).map(([g,v],k)=>
+    `<div><i style="background:${PAL[k%PAL.length]}"></i>${g} <b>${(v*100).toFixed(1)}</b></div>`).join('');
+}
+
+/* ---------- panel sector ---------- */
+function panelSector(){
+  const P=D.presets[lado], out=[];
+  const grupo=(t,tipo)=>{
+    const it=Object.entries(P).filter(([,v])=>v.tipo===tipo);
+    if(!it.length) return;
+    out.push(`<p class="eyebrow">${t}</p>`);
+    it.forEach(([k,v])=>out.push(`<button class="opcion" data-p="${k}" aria-pressed="${k===preset}">
+      <span>${k}</span><span class="pz">${(v.peso*100).toFixed(tipo==='total'?0:1)}%</span></button>`));
+  };
+  grupo('Agregado','total'); grupo('Familias por perfil','familia'); grupo('Rubros','rubro');
+
+  $('#panel').innerHTML=`
+  <div class="caja"><h2>Qué se pondera</h2><div class="cuerpo">
+    <div class="lados" role="group">
+      <button id="bImpo" aria-pressed="${lado==='IMPO'}">Importaciones</button>
+      <button id="bExpo" aria-pressed="${lado==='EXPO'}">Exportaciones</button>
+    </div><div id="presets">${out.join('')}</div>
+  </div></div>
+  <div class="caja"><h2>Socios en la canasta</h2><div class="cuerpo">
+    <div class="paises" id="paises"></div>
+    <div class="acciones"><button id="bTodos">Todos</button><button id="bNinguno">Ninguno</button></div>
+  </div></div>`;
+
+  $('#bImpo').onclick=()=>{lado='IMPO';preset='Total del intercambio';apagados.clear();render();};
+  $('#bExpo').onclick=()=>{lado='EXPO';preset='Total del intercambio';apagados.clear();render();};
+  $('#presets').querySelectorAll('.opcion').forEach(b=>b.onclick=()=>{preset=b.dataset.p;render();});
+  $('#bTodos').onclick=()=>{apagados.clear();render();};
+  $('#bNinguno').onclick=()=>{G.forEach(g=>apagados.add(g));render();};
+
+  const P2=D.presets[lado][preset], w=pesosSector();
+  const orden=G.map((g,i)=>[g,P2.w[i],i]).sort((a,b)=>b[1]-a[1]);
+  $('#paises').innerHTML=orden.map(([g,,i])=>{
+    const off=apagados.has(g);
+    return `<label class="pais ${off?'apagado':''}"><input type="checkbox" data-g="${g}" ${off?'':'checked'}>
+      <span class="n">${g}</span><span class="w">${off?'—':((w?w[i]:0)*100).toFixed(1)}</span></label>`;
+  }).join('');
+  $('#paises').querySelectorAll('input').forEach(c=>c.onchange=()=>{
+    c.checked?apagados.delete(c.dataset.g):apagados.add(c.dataset.g); render(); });
+}
+
+/* ---------- panel empresa ---------- */
+function filas(obj,id){
+  const w=norm(obj);
+  return G.map((g,i)=>{
+    const v=obj[g]||0;
+    return `<div class="fila ${v>0?'':'cero'}">
+      <span class="n">${g}</span>
+      <input type="number" min="0" step="1" data-c="${id}" data-g="${g}" value="${v||''}" placeholder="0" aria-label="${g}">
+      <span class="pc">${w&&w[i]>0?(w[i]*100).toFixed(0)+'%':'—'}</span></div>`;
+  }).join('');
+}
+function panelEmpresa(){
+  const sv=G.reduce((a,g)=>a+(+ventas[g]||0),0), sc=G.reduce((a,g)=>a+(+compras[g]||0),0);
+  $('#panel').innerHTML=`
+  <div class="caja"><h2>Adónde vendo</h2><div class="cuerpo">
+    <div class="canasta">${filas(ventas,'v')}</div>
+    <div class="suma"><span class="t">Suma cargada</span><span class="v">${sv.toFixed(0)}</span></div>
+    <div class="acciones">
+      <button data-carga="v-sector">Usar promedio del sector</button>
+      <button data-carga="v-cero">Borrar</button>
+    </div>
+  </div></div>
+  <div class="caja"><h2>De dónde compro insumos</h2><div class="cuerpo">
+    <div class="canasta">${filas(compras,'c')}</div>
+    <div class="suma"><span class="t">Suma cargada</span><span class="v">${sc.toFixed(0)}</span></div>
+    <div class="acciones">
+      <button data-carga="c-sector">Usar promedio del sector</button>
+      <button data-carga="c-cero">Borrar</button>
+    </div>
+  </div></div>`;
+
+  $('#panel').querySelectorAll('input').forEach(inp=>{
+    inp.oninput=()=>{
+      const o=inp.dataset.c==='v'?ventas:compras;
+      o[inp.dataset.g]=Math.max(0,+inp.value||0);
+      render({foco:inp.dataset.c+'|'+inp.dataset.g});
+    };
+  });
+  $('#panel').querySelectorAll('[data-carga]').forEach(b=>b.onclick=()=>{
+    const [c,acc]=b.dataset.carga.split('-');
+    const o=c==='v'?ventas:compras;
+    if(acc==='cero') G.forEach(g=>o[g]=0);
+    else { const base=D.presets[c==='v'?'EXPO':'IMPO']['Total del intercambio'].w;
+           G.forEach((g,i)=>o[g]=Math.round(base[i]*1000)/10); }
+    render();
+  });
+}
+
+/* ---------- render ---------- */
+function render(op){
+  op=op||{};
+  if(modo==='sector') panelSector(); else panelEmpresa();
+  $('#mSector').setAttribute('aria-pressed', modo==='sector');
+  $('#mEmpresa').setAttribute('aria-pressed', modo==='empresa');
+
+  const s=set(), k=corte();
+  fechas=s.fechas.slice(k);
+  const ref=s.itcrm.slice(k);
+  lineas=[]; let lect='', avisos='', pies='';
+
+  if(modo==='sector'){
+    const w=pesosSector(), y=serie(w);
+    lineas.push({y:ref,c:'#4FB8A8',w:1.2});
+    if(y) lineas.push({y:y.slice(k),c:'#FF7A2F',w:2});
+    $('#claves').innerHTML=`<div><i style="background:#FF7A2F"></i>${preset} · ${lado==='IMPO'?'importaciones':'exportaciones'}</div>
+      <div><i style="background:#4FB8A8"></i>ITCRM del BCRA</div>`;
+    const a=ult(y?y.slice(k):null), b=ult(ref);
+    lect=`<div class="dato"><span class="k">Índice armado</span><span class="v colado">${a==null?'—':a.toFixed(1)}</span></div>
+      <div class="dato"><span class="k">ITCRM BCRA</span><span class="v chico patina">${b==null?'—':b.toFixed(1)}</span></div>`;
+    if(a!=null&&b!=null){ const g=(a/b-1)*100;
+      lect+=`<div class="dato"><span class="k">Brecha</span><span class="v chico" style="color:${Math.abs(g)<1?'var(--tenue)':(g>0?'var(--patina)':'var(--alerta)')}">${(g>=0?'+':'')+g.toFixed(1)}%</span></div>`; }
+    pintarBarra(w,'Vector de ponderadores');
+    const cob=D.presets[lado][preset].cobertura;
+    if(cob<0.70) avisos=`<div class="nota"><b>Cobertura ${(cob*100).toFixed(1)}%.</b>
+      Los 13 socios del BCRA explican menos del 70% de este flujo. Sirve para analizar, no para publicar.</div>`;
+    else if(apagados.size) avisos=`<div class="nota"><b>Canasta recortada.</b>
+      Sacaste ${apagados.size} socio${apagados.size>1?'s':''}; el resto se renormalizó a 100%.</div>`;
+    pies=`<p class="pie">El índice es el promedio geométrico ponderado de los tipos de cambio reales
+      bilaterales del BCRA: <code>I = Π ITCRB_j ^ w_j</code>. Rubros, familias y selección manual son
+      todos el mismo cálculo con distinto vector <code>w</code>.</p>`;
+  } else {
+    const wv=norm(ventas), wc=norm(compras);
+    const yv=serie(wv), yc=serie(wc);
+    lineas.push({y:ref,c:'#4FB8A8',w:1.2,d:[4,4]});
+    if(yv) lineas.push({y:yv.slice(k),c:'#FF7A2F',w:2});
+    if(yc) lineas.push({y:yc.slice(k),c:'#8FA8BC',w:2});
+    $('#claves').innerHTML=
+      `${wv?'<div><i style="background:#FF7A2F"></i>Canasta de ventas</div>':''}
+       ${wc?'<div><i style="background:#8FA8BC"></i>Canasta de insumos</div>':''}
+       <div><i style="background:#4FB8A8"></i>ITCRM del BCRA</div>`;
+    const a=ult(yv?yv.slice(k):null), b=ult(yc?yc.slice(k):null), r=ult(ref);
+    lect=`<div class="dato"><span class="k">Ventas</span><span class="v colado">${a==null?'—':a.toFixed(1)}</span></div>
+      <div class="dato"><span class="k">Insumos</span><span class="v chico acero">${b==null?'—':b.toFixed(1)}</span></div>`;
+    if(a!=null&&b!=null){
+      const rel=a/b*100;
+      lect+=`<div class="dato"><span class="k">Ventas / insumos</span><span class="v chico" style="color:${rel>100?'var(--patina)':'var(--alerta)'}">${rel.toFixed(1)}</span></div>`;
+    } else lect+=`<div class="dato"><span class="k">ITCRM BCRA</span><span class="v chico patina">${r==null?'—':r.toFixed(1)}</span></div>`;
+    pintarBarra(wv||wc, wv?'Canasta de ventas':'Canasta de insumos');
+    avisos=`<div class="nota info"><b>Solo 13 socios disponibles.</b>
+      Son los que el BCRA publica como bilaterales. Si tu empresa vende o compra fuera de esta lista,
+      esa parte no se puede representar todavía y lo que cargues se renormaliza sobre el resto.</div>`;
+    pies=`<p class="pie">Cargá los porcentajes como los tengas, no hace falta que sumen 100: la columna
+      de la derecha muestra la participación normalizada que efectivamente se usa.</p>
+      <p class="pie"><b style="color:var(--tenue)">Ventas / insumos</b> compara cómo se movió tu
+      competitividad de venta contra tu costo de insumos importados. Por encima de 100, el tipo de
+      cambio real jugó más a favor de lo que vendés que en contra de lo que comprás. Es un indicador
+      de exposición cambiaria, no un modelo de margen: no contempla insumos nacionales, aranceles,
+      retenciones ni la estructura de costos.</p>`;
+  }
+
+  $('#lectura').innerHTML=lect;
+  $('#aviso').innerHTML=avisos;
+  $('#pies').innerHTML=pies;
+  dibujar();
+
+  if(op.foco){
+    const [c,g]=op.foco.split('|');
+    const el=$(`input[data-c="${c}"][data-g="${CSS.escape(g)}"]`);
+    if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length); }
+  }
+}
+
+$('#mSector').onclick=()=>{modo='sector';render();};
+$('#mEmpresa').onclick=()=>{modo='empresa';render();};
+document.querySelectorAll('.rangos button').forEach(b=>b.onclick=()=>{
+  rango=b.dataset.r;
+  document.querySelectorAll('.rangos button').forEach(o=>o.setAttribute('aria-pressed',o===b));
+  render();
+});
+addEventListener('resize',dibujar);
+render();
+})();
+</script>
+</body></html>

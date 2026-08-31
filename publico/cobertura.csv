@@ -1,0 +1,25 @@
+serie,lado,tipo,ventana,peso_rubro,cobertura,publicable
+IMPO total,IMPO,total,12,1.0,0.9498,True
+IMPO - Origen Brasil,IMPO,familia,12,0.258,0.9492,True
+IMPO - Origen asiático,IMPO,familia,12,0.5092,0.9413,True
+IMPO - Origen diversificado,IMPO,familia,12,0.2328,0.964,True
+IMPO - Otros productos de metal,IMPO,rubro,12,0.2691,0.9523,True
+IMPO - Equipos y aparatos eléctricos,IMPO,rubro,12,0.2401,0.9201,True
+IMPO - Autopartes,IMPO,rubro,12,0.2211,0.9415,True
+IMPO - Bienes de capital,IMPO,rubro,12,0.203,0.9689,True
+IMPO - Maquinaria agrícola,IMPO,rubro,12,0.0338,0.9898,True
+IMPO - Equipamiento médico,IMPO,rubro,12,0.0266,0.9344,True
+IMPO - Buques y embarcaciones,IMPO,rubro,36,0.0032,0.9736,True
+IMPO - Carrocerias y remolques,IMPO,rubro,12,0.0032,0.9988,True
+EXPO total,EXPO,total,12,1.0,0.8505,True
+EXPO - Destino Brasil,EXPO,familia,12,0.2844,0.9603,True
+EXPO - Destino extrarregional,EXPO,familia,12,0.6499,0.8045,True
+EXPO - Destino regional,EXPO,familia,12,0.0522,0.8369,True
+EXPO - Otros productos de metal,EXPO,rubro,12,0.4536,0.7632,True
+EXPO - Autopartes,EXPO,rubro,12,0.2844,0.9603,True
+EXPO - Bienes de capital,EXPO,rubro,12,0.141,0.8874,True
+EXPO - Equipos y aparatos eléctricos,EXPO,rubro,12,0.0553,0.8948,True
+EXPO - Maquinaria agrícola,EXPO,rubro,12,0.0288,0.7283,True
+EXPO - Buques y embarcaciones,EXPO,rubro,36,0.0159,0.9591,True
+EXPO - Equipamiento médico,EXPO,rubro,12,0.0135,0.851,True
+EXPO - Carrocerias y remolques,EXPO,rubro,12,0.0075,0.914,True
