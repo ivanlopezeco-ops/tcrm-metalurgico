@@ -1,0 +1,89 @@
+# Actualizacion diaria del TCRM Metalurgico
+#
+# Corre en la infraestructura de GitHub, sin necesidad de una maquina prendida.
+# Baja las fuentes, recalcula, valida, y publica en GitHub Pages: el tablero
+# HTML mas los CSV, que quedan en URLs estables para que Power BI, Excel o
+# cualquier otra herramienta se conecten por web sin autenticacion.
+#
+# Si una validacion falla, NO publica: las salidas anteriores quedan intactas
+# y el workflow termina en rojo. Es preferible un dia de atraso a un numero
+# equivocado en un informe.
+#
+# Puesta en marcha:
+#   1. Settings > Pages > Source: GitHub Actions
+#   2. Settings > Actions > General > Workflow permissions: Read and write
+#   3. Dejar en datos/comercio/ las dos exportaciones de Power BI
+#   4. Actions > Actualizar TCRM > Run workflow (para probar sin esperar)
+
+name: Actualizar TCRM
+
+on:
+  schedule:
+    # 11:00 UTC = 08:00 en Argentina. El BCRA publica temprano.
+    - cron: "0 11 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write        # para versionar las salidas
+  pages: write           # para publicar el sitio
+  id-token: write
+
+concurrency:
+  group: tcrm
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -q pandas numpy openpyxl requests
+
+      # Evita rebajar treinta anos de cotizaciones todos los dias: la API del
+      # BCRA se consulta solo por los dias nuevos.
+      - name: Cache de cotizaciones
+        uses: actions/cache@v4
+        with:
+          path: datos/api_bcra
+          key: cotizaciones-${{ github.run_id }}
+          restore-keys: cotizaciones-
+
+      - name: Calcular y validar
+        run: python actualizar.py
+
+      - name: Versionar salidas
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add publico/ datos/api_bcra/ || true
+          git diff --staged --quiet || git commit -m "Actualizacion ${{ github.run_number }} [skip ci]"
+          git push
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: publico
+      - id: pages
+        uses: actions/deploy-pages@v4
+
+      # La bitacora se conserva aunque algo haya fallado, que es cuando mas
+      # se necesita.
+      - name: Guardar bitacora
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: registro-${{ github.run_number }}
+          path: salida/registro.txt
+          retention-days: 30
