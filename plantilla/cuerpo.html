@@ -1,219 +1,281 @@
 <style>
 :root{
-  --tinta:#0E151B; --panel:#151E26; --panel2:#1B2731; --regla:#25333F;
-  --texto:#DFE7ED; --tenue:#7D8E9C; --debil:#4E5F6C;
-  --colado:#FF7A2F; --patina:#4FB8A8; --alerta:#D9A441; --acero:#8FA8BC;
+  --azul:#414FB1;
+  --azul-medio:#7079C7;
+  --azul-suave:#A8AEDD;
+  --azul-tenue:#EEF0FA;
+  --tinta:#1F2430;
+  --gris:#5B6472;
+  --gris-claro:#8C95A4;
+  --linea:#E3E7ED;
+  --panel:#F7F8FB;
+  --blanco:#FFFFFF;
+  --verde:#1E8E5A;
+  --rojo:#C0392B;
+  --ambar:#B7791F;
+  --titulo:"Segoe UI","Segoe UI Web",system-ui,-apple-system,sans-serif;
+  --sub:"DIN Light","DIN Next W01 Light","DIN Alternate","Segoe UI Light",
+        "Segoe UI",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--tinta);color:var(--texto);
-  font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;
+body{background:var(--blanco);color:var(--tinta);
+  font-family:var(--titulo);font-size:14px;line-height:1.5;
   -webkit-font-smoothing:antialiased}
-#app{max-width:1240px;margin:0 auto;padding:26px 20px 60px}
+#app{max-width:1180px;margin:0 auto;padding:22px 22px 40px}
 
-.cab{display:flex;flex-wrap:wrap;align-items:flex-end;gap:26px;
-  padding-bottom:16px;border-bottom:1px solid var(--regla);margin-bottom:18px}
-.marca{flex:1 1 250px}
-.marca h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:25px;
-  font-weight:700;letter-spacing:.02em;text-transform:uppercase}
-.marca p{color:var(--tenue);font-size:12.5px;margin-top:3px}
-.lectura{display:flex;gap:24px;flex-wrap:wrap}
-.dato .k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--tenue);display:block;margin-bottom:2px}
-.dato .v{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;line-height:1}
-.dato .v.chico{font-size:19px}
-.colado{color:var(--colado)} .patina{color:var(--patina)} .acero{color:var(--acero)}
+/* ---------- encabezado ---------- */
+.cab{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;
+  padding-bottom:14px;border-bottom:2px solid var(--azul);margin-bottom:20px}
+.cab .t{flex:1 1 320px}
+.cab h1{font-size:26px;font-weight:700;color:var(--azul);letter-spacing:-.01em}
+.cab p{font-family:var(--sub);font-size:14.5px;color:var(--gris);margin-top:3px}
+.logos{display:flex;align-items:center;gap:16px}
+.logos img{height:34px;width:auto;display:block}
 
-/* modos */
-.modos{display:flex;gap:0;border:1px solid var(--regla);border-radius:3px;
-  overflow:hidden;margin-bottom:18px;max-width:420px}
-.modos button{flex:1;background:transparent;border:0;color:var(--tenue);cursor:pointer;
-  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.07em;
-  text-transform:uppercase;padding:9px 0;transition:.15s}
-.modos button[aria-pressed="true"]{background:var(--panel2);color:var(--texto)}
-.modos button:focus-visible{outline:2px solid var(--colado);outline-offset:-2px}
+/* ---------- pestanas de modo ---------- */
+.modos{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.modos button{background:var(--blanco);border:1px solid var(--linea);
+  color:var(--gris);cursor:pointer;font-family:var(--titulo);font-size:14px;
+  font-weight:600;padding:9px 18px;border-radius:6px;transition:.15s}
+.modos button:hover{border-color:var(--azul-suave);color:var(--azul)}
+.modos button[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);
+  color:#fff}
+.modos button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
 
-.grilla{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
-@media(max-width:880px){.grilla{grid-template-columns:1fr}}
-.caja{background:var(--panel);border:1px solid var(--regla);border-radius:3px}
-.caja+.caja{margin-top:16px}
-.caja h2{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;
-  letter-spacing:.11em;text-transform:uppercase;color:var(--tenue);
-  padding:11px 14px;border-bottom:1px solid var(--regla)}
-.cuerpo{padding:12px 14px}
+/* ---------- selector de lado ---------- */
+.lado{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+@media(max-width:640px){.lado{grid-template-columns:1fr}}
+.lado button{text-align:left;background:var(--blanco);border:1.5px solid var(--linea);
+  border-radius:8px;padding:12px 16px;cursor:pointer;transition:.15s;
+  font-family:var(--titulo)}
+.lado button:hover{border-color:var(--azul-suave)}
+.lado button[aria-pressed="true"]{border-color:var(--azul);background:var(--azul-tenue)}
+.lado button strong{display:block;font-size:15px;font-weight:700;color:var(--tinta)}
+.lado button[aria-pressed="true"] strong{color:var(--azul)}
+.lado button span{display:block;font-family:var(--sub);font-size:12.5px;
+  color:var(--gris);margin-top:2px;line-height:1.35}
+.lado button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
 
-.lados{display:flex;border:1px solid var(--regla);border-radius:3px;overflow:hidden;margin-bottom:14px}
-.lados button{flex:1;background:transparent;border:0;color:var(--tenue);cursor:pointer;
-  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.07em;
-  text-transform:uppercase;padding:8px 0;transition:.15s}
-.lados button[aria-pressed="true"]{background:var(--panel2);color:var(--texto)}
-.lados button:focus-visible{outline:2px solid var(--colado);outline-offset:-2px}
+/* ---------- cifras ---------- */
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--linea);border:1px solid var(--linea);
+  border-radius:8px;overflow:hidden;margin-bottom:16px}
+.cifra{background:var(--blanco);padding:14px 16px;text-align:center}
+.cifra .k{font-family:var(--sub);font-size:13px;color:var(--gris);display:block;
+  margin-bottom:4px}
+.cifra .v{font-size:30px;font-weight:700;line-height:1.1;color:var(--azul)}
+.cifra .v.pos{color:var(--verde)} .cifra .v.neg{color:var(--rojo)}
+.cifra .n{font-family:var(--sub);font-size:11.5px;color:var(--gris-claro);
+  display:block;margin-top:3px}
 
-.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.11em;
-  text-transform:uppercase;color:var(--debil);margin:14px 0 6px}
+/* ---------- grilla ---------- */
+.grilla{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+@media(max-width:900px){.grilla{grid-template-columns:1fr}}
+.caja{background:var(--blanco);border:1px solid var(--linea);border-radius:8px}
+.caja+.caja{margin-top:14px}
+.caja>h2{font-family:var(--sub);font-size:14px;font-weight:400;color:var(--tinta);
+  padding:12px 16px;border-bottom:1px solid var(--linea)}
+.cuerpo{padding:14px 16px}
+
+/* ---------- listas ---------- */
+.eyebrow{font-family:var(--sub);font-size:11.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--gris-claro);margin:14px 0 6px}
 .eyebrow:first-child{margin-top:0}
+.opcion{display:flex;justify-content:space-between;gap:10px;width:100%;
+  text-align:left;background:transparent;border:0;color:var(--tinta);
+  cursor:pointer;padding:7px 10px;border-radius:5px;font-size:13.5px;
+  font-family:var(--titulo);transition:.12s}
+.opcion:hover{background:var(--panel)}
+.opcion[aria-pressed="true"]{background:var(--azul-tenue);color:var(--azul);
+  font-weight:600}
+.opcion .pz{font-family:var(--sub);font-size:12px;color:var(--gris-claro)}
+.opcion[aria-pressed="true"] .pz{color:var(--azul-medio)}
+.opcion:focus-visible{outline:2px solid var(--azul);outline-offset:-2px}
 
-.opcion{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;
-  background:transparent;border:0;color:var(--texto);cursor:pointer;padding:6px 8px;
-  border-radius:2px;font-size:13px;transition:.12s}
-.opcion:hover{background:var(--panel2)}
-.opcion[aria-pressed="true"]{background:var(--panel2);box-shadow:inset 2px 0 0 var(--colado)}
-.opcion:focus-visible{outline:1px solid var(--colado)}
-.opcion .pz{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--debil)}
+.paises{display:flex;flex-direction:column;gap:1px;max-height:290px;
+  overflow-y:auto;padding-right:4px}
+.pais{display:grid;grid-template-columns:15px 1fr auto;align-items:center;
+  gap:9px;padding:5px 8px;border-radius:4px;cursor:pointer;font-size:13px}
+.pais:hover{background:var(--panel)}
+.pais input{appearance:none;width:14px;height:14px;border:1.5px solid var(--gris-claro);
+  border-radius:3px;cursor:pointer;position:relative;background:#fff}
+.pais input:checked{background:var(--azul);border-color:var(--azul)}
+.pais input:checked::after{content:"";position:absolute;left:4px;top:1px;
+  width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;
+  transform:rotate(45deg)}
+.pais input:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+.pais.off{color:var(--gris-claro)}
+.pais .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pais .w{font-family:var(--sub);font-size:12.5px;color:var(--gris)}
+.pais.off .w{color:var(--gris-claro)}
 
-.paises{display:flex;flex-direction:column;gap:1px}
-.pais{display:grid;grid-template-columns:16px 1fr auto;align-items:center;gap:8px;
-  padding:5px 8px;border-radius:2px;cursor:pointer;transition:.12s}
-.pais:hover{background:var(--panel2)}
-.pais input{appearance:none;width:12px;height:12px;border:1px solid var(--debil);
-  border-radius:2px;cursor:pointer;position:relative}
-.pais input:checked{background:var(--colado);border-color:var(--colado)}
-.pais input:checked::after{content:"";position:absolute;inset:3px;background:var(--tinta);border-radius:1px}
-.pais input:focus-visible{outline:2px solid var(--colado);outline-offset:2px}
-.pais.apagado{color:var(--debil)}
-.pais .n{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pais .w{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--tenue)}
-.pais.apagado .w{color:var(--debil)}
+.acciones{display:flex;gap:8px;margin-top:10px}
+.acciones button{flex:1;background:var(--blanco);border:1px solid var(--linea);
+  color:var(--gris);font-family:var(--sub);font-size:12px;padding:7px 0;
+  border-radius:5px;cursor:pointer;transition:.12s}
+.acciones button:hover{border-color:var(--azul-suave);color:var(--azul)}
+.acciones button:focus-visible{outline:2px solid var(--azul)}
 
-/* canasta de empresa */
-.canasta{display:flex;flex-direction:column;gap:2px}
-.fila{display:grid;grid-template-columns:1fr 62px 42px;align-items:center;gap:8px;
-  padding:3px 4px;border-radius:2px}
-.fila:hover{background:var(--panel2)}
-.fila .n{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fila.cero .n{color:var(--debil)}
-.fila input{background:var(--tinta);border:1px solid var(--regla);color:var(--texto);
-  font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px 6px;
-  border-radius:2px;width:100%;text-align:right}
-.fila input:focus{outline:0;border-color:var(--colado)}
-.fila.cero input{color:var(--debil)}
-.fila .pc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--tenue);text-align:right}
-.suma{display:flex;justify-content:space-between;margin-top:10px;padding-top:9px;
-  border-top:1px solid var(--regla);font-family:'IBM Plex Mono',monospace;font-size:11.5px}
-.suma .t{color:var(--tenue)} .suma .v{color:var(--texto)}
-.suma.mal .v{color:var(--alerta)}
-
-.acciones{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.acciones button{flex:1 1 auto;background:transparent;border:1px solid var(--regla);
-  color:var(--tenue);font-family:'IBM Plex Mono',monospace;font-size:10px;
-  letter-spacing:.05em;text-transform:uppercase;padding:6px 8px;border-radius:2px;
-  cursor:pointer;transition:.12s}
-.acciones button:hover{border-color:var(--debil);color:var(--texto)}
-.acciones button:focus-visible{outline:2px solid var(--colado)}
-
-.barra{display:flex;height:32px;border:1px solid var(--regla);border-radius:2px;
-  overflow:hidden;background:var(--panel2)}
-.seg{transition:flex-grow .45s cubic-bezier(.4,0,.2,1);min-width:0;
-  display:flex;align-items:center;justify-content:center}
-.seg span{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tinta);
-  font-weight:600;white-space:nowrap;overflow:hidden}
-.leyenda{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:9px}
-.leyenda div{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--tenue)}
-.leyenda i{width:8px;height:8px;border-radius:1px;display:block}
-.leyenda b{font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--texto)}
-
+/* ---------- grafico ---------- */
 .gcab{display:flex;justify-content:space-between;align-items:center;gap:12px;
-  flex-wrap:wrap;padding:11px 14px;border-bottom:1px solid var(--regla)}
-.gcab h2{padding:0;border:0}
-.rangos{display:flex;gap:4px}
-.rangos button{background:transparent;border:1px solid var(--regla);color:var(--tenue);
-  font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 9px;
-  border-radius:2px;cursor:pointer;transition:.12s}
-.rangos button[aria-pressed="true"]{background:var(--panel2);color:var(--texto);border-color:var(--debil)}
-.rangos button:focus-visible{outline:2px solid var(--colado)}
+  flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--linea)}
+.gcab h2{font-family:var(--sub);font-size:15px;color:var(--tinta);padding:0;border:0}
+.gcab .sub{font-family:var(--sub);font-size:12.5px;color:var(--gris-claro);
+  display:block;margin-top:1px}
+.check{display:flex;align-items:center;gap:7px;font-family:var(--sub);
+  font-size:13px;color:var(--gris);cursor:pointer;white-space:nowrap}
+.check input{appearance:none;width:34px;height:19px;border-radius:10px;
+  background:var(--linea);position:relative;cursor:pointer;transition:.18s;flex:none}
+.check input::after{content:"";position:absolute;top:2px;left:2px;width:15px;
+  height:15px;border-radius:50%;background:#fff;transition:.18s;
+  box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.check input:checked{background:var(--azul)}
+.check input:checked::after{left:17px}
+.check input:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
 canvas{display:block;width:100%;height:330px}
-@media(max-width:600px){canvas{height:240px}}
-.claves{display:flex;gap:16px;flex-wrap:wrap;padding:0 14px 12px;font-size:11.5px;color:var(--tenue)}
-.claves div{display:flex;align-items:center;gap:6px}
-.claves i{width:14px;height:2px;display:block}
+@media(max-width:600px){canvas{height:250px}}
+.claves{display:flex;gap:18px;flex-wrap:wrap;padding:0 16px 12px;
+  font-family:var(--sub);font-size:12.5px;color:var(--gris)}
+.claves div{display:flex;align-items:center;gap:7px}
+.claves i{width:16px;height:3px;border-radius:2px;display:block}
 
-.nota{margin-top:10px;padding:9px 12px;border-left:2px solid var(--alerta);
-  background:rgba(217,164,65,.07);font-size:12px;color:var(--tenue);border-radius:0 2px 2px 0}
-.nota b{color:var(--alerta);font-weight:500}
-.nota.info{border-color:var(--acero);background:rgba(143,168,188,.06)}
-.nota.info b{color:var(--acero)}
-.pie{margin-top:20px;font-size:11.5px;color:var(--debil);line-height:1.65}
-.pie code{font-family:'IBM Plex Mono',monospace;color:var(--tenue)}
-.pie+.pie{margin-top:8px}
+/* ---------- selector de periodo ---------- */
+.periodo{padding:12px 16px 14px;border-top:1px solid var(--linea)}
+.pfila{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:9px;flex-wrap:wrap;gap:8px}
+.pfila .et{font-family:var(--sub);font-size:12.5px;color:var(--gris)}
+.pfila .rango{font-family:var(--sub);font-size:13px;color:var(--azul);
+  font-weight:600}
+.atajos{display:flex;gap:6px;flex-wrap:wrap}
+.atajos button{background:var(--blanco);border:1px solid var(--linea);
+  color:var(--gris);font-family:var(--sub);font-size:11.5px;padding:4px 11px;
+  border-radius:12px;cursor:pointer;transition:.12s}
+.atajos button:hover{border-color:var(--azul-suave);color:var(--azul)}
+.atajos button[aria-pressed="true"]{background:var(--azul-tenue);
+  border-color:var(--azul-suave);color:var(--azul);font-weight:600}
+.atajos button:focus-visible{outline:2px solid var(--azul)}
+.slider{position:relative;height:26px;margin:0 8px}
+.slider .riel{position:absolute;top:11px;left:0;right:0;height:4px;
+  background:var(--linea);border-radius:2px}
+.slider .activo{position:absolute;top:11px;height:4px;background:var(--azul);
+  border-radius:2px}
+.slider input{position:absolute;top:6px;left:0;width:100%;height:14px;
+  appearance:none;background:none;pointer-events:none;margin:0}
+.slider input::-webkit-slider-thumb{appearance:none;width:16px;height:16px;
+  border-radius:50%;background:#fff;border:2.5px solid var(--azul);
+  cursor:grab;pointer-events:auto;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.slider input::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
+  background:#fff;border:2.5px solid var(--azul);cursor:grab;
+  pointer-events:auto;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+
+/* ---------- composicion ---------- */
+.barra{display:flex;height:30px;border-radius:5px;overflow:hidden;
+  background:var(--panel)}
+.seg{transition:flex-grow .4s cubic-bezier(.4,0,.2,1);min-width:0;
+  display:flex;align-items:center;justify-content:center}
+.seg span{font-family:var(--sub);font-size:11px;color:#fff;font-weight:600;
+  white-space:nowrap;overflow:hidden}
+.leyenda{display:flex;flex-wrap:wrap;gap:5px 16px;margin-top:10px;
+  font-family:var(--sub);font-size:12.5px;color:var(--gris)}
+.leyenda div{display:flex;align-items:center;gap:6px}
+.leyenda i{width:9px;height:9px;border-radius:2px;display:block}
+.leyenda b{color:var(--tinta);font-weight:600}
+
+/* ---------- canasta propia ---------- */
+.canasta{display:flex;flex-direction:column;gap:2px;max-height:340px;
+  overflow-y:auto;padding-right:4px}
+.fila{display:grid;grid-template-columns:1fr 66px 40px;align-items:center;
+  gap:9px;padding:3px 6px;border-radius:4px}
+.fila:hover{background:var(--panel)}
+.fila .n{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila.cero .n{color:var(--gris-claro)}
+.fila input{background:#fff;border:1px solid var(--linea);color:var(--tinta);
+  font-family:var(--sub);font-size:13px;padding:5px 7px;border-radius:4px;
+  width:100%;text-align:right}
+.fila input:focus{outline:0;border-color:var(--azul)}
+.fila .pc{font-family:var(--sub);font-size:12px;color:var(--gris);text-align:right}
+.suma{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;
+  border-top:1px solid var(--linea);font-family:var(--sub);font-size:13px}
+.suma .v{font-weight:600}
+select{width:100%;padding:8px 10px;border:1px solid var(--linea);border-radius:5px;
+  font-family:var(--titulo);font-size:13.5px;color:var(--tinta);background:#fff;
+  cursor:pointer}
+select:focus{outline:2px solid var(--azul);outline-offset:-1px}
+
+.nota{margin-top:12px;padding:10px 13px;border-left:3px solid var(--ambar);
+  background:#FDF8EE;font-family:var(--sub);font-size:12.5px;color:var(--gris);
+  border-radius:0 4px 4px 0;line-height:1.5}
+.nota b{color:var(--ambar);font-weight:600}
+.nota.info{border-color:var(--azul-suave);background:var(--azul-tenue)}
+.nota.info b{color:var(--azul)}
+.pie{margin-top:18px;padding-top:14px;border-top:1px solid var(--linea);
+  font-family:var(--sub);font-size:12.5px;color:var(--gris-claro);line-height:1.6}
 </style>
 
 <script>
 (function(){
 const D=window.DATOS, G=D.grupos;
-const PAL=['#FF7A2F','#E8894A','#C98F5E','#A8926E','#87927C','#6B9088','#4FB8A8',
-           '#4A9AA0','#457E93','#42687F','#3E5468','#3A4552','#333B44'];
+const PAL=['#414FB1','#5763BB','#6E78C6','#848DD0','#9BA2DA','#B1B7E5','#C8CCEF',
+           '#8C95A4','#9DA5B2','#AEB5C0','#BFC5CE','#D0D4DB','#E1E4E9'];
+const AZUL='#414FB1', AZUL2='#A8AEDD', GRIS='#9CA3AF';
+
+const TEXTO_LADO={
+  IMPO:{titulo:'Importaciones',
+        bajada:'Qué tan caro resulta comprar afuera. Se pondera por el origen de las compras del sector.',
+        sube:'Cuanto más alto, más caro importar y mejor compite la producción nacional.'},
+  EXPO:{titulo:'Exportaciones',
+        bajada:'Qué tan competitivo es vender afuera. Se pondera por el destino de las ventas del sector.',
+        sube:'Cuanto más alto, más conveniente exportar frente a los competidores.'}
+};
 
 let modo='sector', lado='IMPO', preset='Total del intercambio',
-    apagados=new Set(), rango='10a',
-    ventas=Object.fromEntries(G.map(g=>[g,0])),
-    compras=Object.fromEntries(G.map(g=>[g,0]));
+    apagados=new Set(), verBCRA=false, granularidad='mensual',
+    r0=null, r1=null, atajo='10a',
+    canasta=Object.fromEntries(G.map(g=>[g,0])), comparar='Total del intercambio';
 
 const $=s=>document.querySelector(s);
+const fmt=v=>v==null?'—':v.toFixed(1).replace('.',',');
+
 document.getElementById('app').innerHTML=`
 <header class="cab">
-  <div class="marca">
+  <div class="t">
     <h1>Tipo de cambio real metalúrgico</h1>
-    <p>Bilaterales del BCRA reponderados · base 17-dic-2015 = 100</p>
+    <p>Cuánto vale el peso frente a las monedas con las que realmente comercia la metalurgia argentina</p>
   </div>
-  <div class="lectura" id="lectura"></div>
+  <div class="logos">
+    <img src="https://res.cloudinary.com/dst2iprcr/image/upload/v1778116908/LOGO_ADIMRA_PNG_pc5a15.png" alt="ADIMRA">
+    <img src="https://res.cloudinary.com/dst2iprcr/image/upload/v1778116908/LOGO_ECONOMICOS_AZUL_kmxg0k.jpg" alt="Estudios Económicos">
+  </div>
 </header>
 
 <div class="modos" role="group">
-  <button id="mSector" aria-pressed="true">Sector</button>
-  <button id="mEmpresa" aria-pressed="false">Mi empresa</button>
+  <button id="mSector" aria-pressed="true">Índice del sector</button>
+  <button id="mEmpresa" aria-pressed="false">Armá tu propio TCRM</button>
 </div>
 
-<div class="grilla">
-  <aside id="panel"></aside>
-  <main>
-    <div class="caja">
-      <div class="gcab">
-        <h2>Serie</h2>
-        <div class="rangos" role="group">
-          <button data-r="3a">3 años</button>
-          <button data-r="10a" aria-pressed="true">10 años</button>
-          <button data-r="todo">1997–hoy</button>
-          <button data-r="diario">Diario 2024–hoy</button>
-        </div>
-      </div>
-      <div class="cuerpo"><canvas id="lienzo"></canvas></div>
-      <div class="claves" id="claves"></div>
-    </div>
-    <div class="caja" id="cajaBarra">
-      <h2 id="tBarra">Vector de ponderadores</h2>
-      <div class="cuerpo">
-        <div class="barra" id="barra"></div>
-        <div class="leyenda" id="leyenda"></div>
-        <div id="aviso"></div>
-      </div>
-    </div>
-    <div id="pies"></div>
-  </main>
-</div>`;
+<div id="vista"></div>`;
 
-/* ---------- calculo ---------- */
+/* ================= calculo ================= */
 function norm(obj){
   const v=G.map(g=>Math.max(0,+obj[g]||0)), s=v.reduce((a,b)=>a+b,0);
-  return s>0? v.map(x=>x/s) : null;
+  return s>0? v.map(x=>x/s):null;
 }
 function pesosSector(){
   const base=D.presets[lado][preset].w;
   const w=base.map((v,i)=>apagados.has(G[i])?0:v);
   const s=w.reduce((a,b)=>a+b,0);
-  return s>0? w.map(v=>v/s) : null;
+  return s>0? w.map(v=>v/s):null;
 }
-function set(){ return rango==='diario'? D.diario : D.mensual; }
+function set(){ return granularidad==='diario'? D.diario : D.mensual; }
+
 function encadenar(s,w){
-  // Laspeyres geometrico encadenado, renormalizando en cada periodo sobre los
-  // socios con dato. Sin esto, un socio que entra tarde (Rusia arranca en 2015)
-  // recorta toda la serie previa. Es la misma logica que usa el calculo en
-  // Python que genera los CSV.
   if(!w) return null;
   const n=s.fechas.length, y=new Array(n).fill(null);
   const col=G.map(g=>s.bil[g]);
   let acum=0, arranco=false;
   for(let t=0;t<n;t++){
     if(t>0){
-      let d=0, pw=0;
+      let d=0,pw=0;
       for(let j=0;j<G.length;j++){
         if(w[j]===0) continue;
         const a=col[j][t-1], b=col[j][t];
@@ -223,58 +285,28 @@ function encadenar(s,w){
       if(pw>0){ acum+=d/pw; arranco=true; }
     }
     let hay=false;
-    for(let j=0;j<G.length;j++){ if(w[j]>0 && col[j][t]!=null){ hay=true; break; } }
-    if(hay && (arranco||t===0)) y[t]=Math.exp(acum);
+    for(let j=0;j<G.length;j++){ if(w[j]>0&&col[j][t]!=null){hay=true;break;} }
+    if(hay&&(arranco||t===0)) y[t]=Math.exp(acum);
   }
   return y;
 }
-
-// Encadenar da una serie sin nivel: hay que anclarla. La base del BCRA es el
-// 17-dic-2015, que es el dia de la salida del cepo y el mayor salto diario de
-// toda la serie. Anclar el mensual en el promedio de diciembre en lugar del
-// dia exacto desviaba 17%. Por eso el mensual se engancha al diario, que si
-// puede anclarse en la fecha exacta.
-function pesosActuales(){ return modo==='sector' ? pesosSector() : norm(ventas); }
-
-// Nombre de la serie oficial que corresponde al preset elegido, si es que
-// corresponde alguna: solo en modo sector, sin socios apagados.
-function claveOficial(){
-  if(modo!=='sector' || apagados.size) return null;
-  const n = preset==='Total del intercambio' ? lado+' total' : lado+' - '+preset;
-  const o = D.oficiales && D.oficiales[rango==='diario'?'diario':'mensual'];
-  return (o && o[n]) ? n : null;
-}
-
-function serie(w){
-  // Los presets muestran la serie oficial, calculada con ponderadores moviles.
-  // El calculo en vivo del navegador usa un vector fijo, asi que se reserva
-  // para las canastas a medida, donde no hay serie precalculada posible.
-  const k=claveOficial();
-  if(k) return D.oficiales[rango==='diario'?'diario':'mensual'][k];
-  const s=set();
-  return anclar(encadenar(s,w), s.fechas, rango==='diario');
-}
-
-function anclar(y, fechas, esDiario){
+function anclar(y,fechas,esDiario,w){
   if(!y) return y;
   if(esDiario){
     let i=fechas.indexOf('2015-12-17');
     if(i<0||y[i]==null) for(let t=0;t<fechas.length;t++) if(fechas[t]>='2015-12-17'&&y[t]!=null){i=t;break;}
     if(i<0||y[i]==null) return y;
-    const k=100/y[i];
-    return y.map(v=>v==null?null:v*k);
+    const k=100/y[i]; return y.map(v=>v==null?null:v*k);
   }
-  // mensual: se calcula la misma canasta en diario, ya anclada, y se compara
-  // en un mes de solape
-  const d=D.diario, w=pesosActuales();
-  const yd=anclar(encadenar(d,w), d.fechas, true);
+  const d=D.diario;
+  const yd=anclar(encadenar(d,w),d.fechas,true,w);
   if(!yd) return y;
   const prom={};
   d.fechas.forEach((f,t)=>{ if(yd[t]==null) return;
     const m=f.slice(0,7); (prom[m]=prom[m]||[]).push(yd[t]); });
   for(let t=0;t<fechas.length;t++){
     const m=fechas[t].slice(0,7);
-    if(y[t]!=null && prom[m] && m>='2016-01'){
+    if(y[t]!=null&&prom[m]&&m>='2016-01'){
       const ref=prom[m].reduce((a,b)=>a+b,0)/prom[m].length;
       const k=ref/y[t];
       return y.map(v=>v==null?null:v*k);
@@ -282,49 +314,78 @@ function anclar(y, fechas, esDiario){
   }
   return y;
 }
-function corte(){
-  const s=set();
-  if(rango==='diario'||rango==='todo') return 0;
-  const c=new Date(); c.setFullYear(c.getFullYear()-(rango==='3a'?3:10));
-  const i=s.fechas.findIndex(d=>d>=c.toISOString().slice(0,10));
-  return i<0?0:i;
+function oficial(nombre){
+  const o=D.oficiales&&D.oficiales[granularidad==='diario'?'diario':'mensual'];
+  return (o&&o[nombre])?o[nombre]:null;
 }
-const ult=a=>{ if(!a) return null; for(let i=a.length-1;i>=0;i--) if(a[i]!=null) return a[i]; return null; };
+const nombreSerie=(l,p)=> p==='Total del intercambio'? l+' total' : l+' - '+p;
 
-/* ---------- grafico ---------- */
-const cv=$('#lienzo'), cx=cv.getContext('2d');
+function serie(w,nombreOficial){
+  if(nombreOficial){ const o=oficial(nombreOficial); if(o) return o; }
+  const s=set();
+  return anclar(encadenar(s,w),s.fechas,granularidad==='diario',w);
+}
+function serieSector(){
+  if(!apagados.size) return serie(null,nombreSerie(lado,preset));
+  return serie(pesosSector(),null);
+}
+
+/* ================= periodo ================= */
+const ejeFechas=()=>set().fechas;
+function aplicarAtajo(a){
+  const f=ejeFechas(); atajo=a;
+  if(a==='todo'){ r0=0; r1=f.length-1; return; }
+  const anios={'3a':3,'10a':10,'20a':20}[a]||10;
+  const c=new Date(); c.setFullYear(c.getFullYear()-anios);
+  const iso=c.toISOString().slice(0,10);
+  let i=f.findIndex(d=>d>=iso); if(i<0) i=0;
+  r0=i; r1=f.length-1;
+}
+function recorte(y){
+  const f=ejeFechas();
+  const a=Math.max(0,Math.min(r0,f.length-1)), b=Math.max(a+1,Math.min(r1,f.length-1));
+  return {f:f.slice(a,b+1), y:y?y.slice(a,b+1):null};
+}
+
+/* ================= grafico ================= */
 let lineas=[], fechas=[];
 function dibujar(){
+  const cv=document.getElementById('lienzo'); if(!cv) return;
+  const cx=cv.getContext('2d');
   const dpr=devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
   cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0); cx.clearRect(0,0,W,H);
-  const m={t:14,r:12,b:26,l:44}, pw=W-m.l-m.r, ph=H-m.t-m.b;
-  const todos=lineas.flatMap(l=>l.y).filter(v=>v!=null);
+  const m={t:16,r:14,b:28,l:46}, pw=W-m.l-m.r, ph=H-m.t-m.b;
+  const ff=getComputedStyle(document.body).fontFamily;
+  const todos=lineas.flatMap(l=>l.y||[]).filter(v=>v!=null);
   if(!todos.length||fechas.length<2){
-    cx.fillStyle='#4E5F6C'; cx.font="12px 'IBM Plex Mono',monospace"; cx.textAlign='center';
-    cx.fillText('Cargá al menos un socio con peso mayor a cero', W/2, H/2); return;
+    cx.fillStyle='#8C95A4'; cx.font='13px '+ff; cx.textAlign='center';
+    cx.fillText('Elegí al menos un país', W/2, H/2); return;
   }
   let lo=Math.min(...todos), hi=Math.max(...todos);
-  const p=(hi-lo)*0.10||5; lo-=p; hi+=p;
+  const p=(hi-lo)*0.12||5; lo-=p; hi+=p;
   const X=i=>m.l+(i/(fechas.length-1))*pw, Y=v=>m.t+(1-(v-lo)/(hi-lo))*ph;
-  cx.strokeStyle='#25333F'; cx.lineWidth=1; cx.fillStyle='#4E5F6C';
-  cx.font="10px 'IBM Plex Mono',monospace"; cx.textAlign='right';
+
+  cx.strokeStyle='#EDF0F4'; cx.lineWidth=1; cx.fillStyle='#8C95A4';
+  cx.font='11px '+ff; cx.textAlign='right';
   for(let k=0;k<=4;k++){
     const v=lo+(hi-lo)*k/4, y=Math.round(Y(v))+.5;
     cx.beginPath(); cx.moveTo(m.l,y); cx.lineTo(W-m.r,y); cx.stroke();
-    cx.fillText(v.toFixed(0), m.l-7, y+3);
+    cx.fillText(v.toFixed(0), m.l-8, y+4);
   }
   if(lo<100&&hi>100){
     const y=Math.round(Y(100))+.5;
-    cx.save(); cx.setLineDash([3,4]); cx.strokeStyle='#4E5F6C';
+    cx.save(); cx.setLineDash([4,4]); cx.strokeStyle='#C8CCEF';
     cx.beginPath(); cx.moveTo(m.l,y); cx.lineTo(W-m.r,y); cx.stroke(); cx.restore();
   }
   cx.textAlign='center';
   const paso=Math.max(1,Math.floor(fechas.length/6));
   for(let i=0;i<fechas.length;i+=paso)
-    cx.fillText(fechas.length>400?fechas[i].slice(0,4):fechas[i].slice(0,7), X(i), H-8);
+    cx.fillText(fechas.length>400?fechas[i].slice(0,4):fechas[i].slice(0,7), X(i), H-9);
+
   lineas.forEach(l=>{
-    cx.strokeStyle=l.c; cx.lineWidth=l.w||2; cx.lineJoin='round';
-    if(l.d) cx.setLineDash(l.d); else cx.setLineDash([]);
+    if(!l.y) return;
+    cx.strokeStyle=l.c; cx.lineWidth=l.w||2.2; cx.lineJoin='round'; cx.lineCap='round';
+    cx.setLineDash(l.d||[]);
     cx.beginPath(); let mov=true;
     l.y.forEach((v,i)=>{ if(v==null){mov=true;return;}
       const x=X(i), y=Y(v); if(mov){cx.moveTo(x,y);mov=false;} else cx.lineTo(x,y); });
@@ -332,20 +393,38 @@ function dibujar(){
   });
 }
 
-/* ---------- barra ---------- */
-function pintarBarra(w,titulo){
-  $('#tBarra').textContent=titulo;
-  const seg=w? G.map((g,i)=>[g,w[i]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]) : [];
-  $('#barra').innerHTML=seg.map(([g,v],k)=>
-    `<div class="seg" style="flex:${v} 0 0;background:${PAL[k%PAL.length]}"
-      title="${g}: ${(v*100).toFixed(1)}%"><span>${v>0.07?(v*100).toFixed(0):''}</span></div>`).join('');
-  $('#leyenda').innerHTML=seg.slice(0,8).map(([g,v],k)=>
-    `<div><i style="background:${PAL[k%PAL.length]}"></i>${g} <b>${(v*100).toFixed(1)}</b></div>`).join('');
+/* ================= vistas ================= */
+function bloqueGrafico(titulo,sub,claves,conBCRA){
+  return `<div class="caja">
+    <div class="gcab">
+      <div><h2>${titulo}</h2><span class="sub">${sub}</span></div>
+      ${conBCRA?`<label class="check"><input type="checkbox" id="chkBCRA" ${verBCRA?'checked':''}>
+        Ver también el índice original del BCRA</label>`:''}
+    </div>
+    <div class="cuerpo" style="padding-bottom:4px"><canvas id="lienzo"></canvas></div>
+    <div class="claves">${claves}</div>
+    <div class="periodo">
+      <div class="pfila"><span class="et">Período</span><span class="rango" id="rangoTxt"></span></div>
+      <div class="slider">
+        <div class="riel"></div><div class="activo" id="act"></div>
+        <input type="range" id="s0" min="0" step="1" aria-label="Desde">
+        <input type="range" id="s1" min="0" step="1" aria-label="Hasta">
+      </div>
+      <div class="pfila" style="margin:10px 0 0">
+        <div class="atajos" role="group">
+          <button data-a="3a">3 años</button><button data-a="10a">10 años</button>
+          <button data-a="20a">20 años</button><button data-a="todo">Todo</button>
+        </div>
+        <div class="atajos" role="group">
+          <button data-g="mensual">Mensual</button><button data-g="diario">Diario</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
-/* ---------- panel sector ---------- */
-function panelSector(){
-  const P=D.presets[lado], out=[];
+function vistaSector(){
+  const T=TEXTO_LADO[lado], P=D.presets[lado], out=[];
   const grupo=(t,tipo)=>{
     const it=Object.entries(P).filter(([,v])=>v.tipo===tipo);
     if(!it.length) return;
@@ -353,166 +432,217 @@ function panelSector(){
     it.forEach(([k,v])=>out.push(`<button class="opcion" data-p="${k}" aria-pressed="${k===preset}">
       <span>${k}</span><span class="pz">${(v.peso*100).toFixed(tipo==='total'?0:1)}%</span></button>`));
   };
-  grupo('Agregado','total'); grupo('Familias por perfil','familia'); grupo('Rubros','rubro');
+  grupo('Todo el sector','total');
+  grupo('Por perfil de origen o destino','familia');
+  grupo('Por rubro','rubro');
 
-  $('#panel').innerHTML=`
-  <div class="caja"><h2>Qué se pondera</h2><div class="cuerpo">
-    <div class="lados" role="group">
-      <button id="bImpo" aria-pressed="${lado==='IMPO'}">Importaciones</button>
-      <button id="bExpo" aria-pressed="${lado==='EXPO'}">Exportaciones</button>
-    </div><div id="presets">${out.join('')}</div>
-  </div></div>
-  <div class="caja"><h2>Socios en la canasta</h2><div class="cuerpo">
-    <div class="paises" id="paises"></div>
-    <div class="acciones"><button id="bTodos">Todos</button><button id="bNinguno">Ninguno</button></div>
-  </div></div>`;
-
-  $('#bImpo').onclick=()=>{lado='IMPO';preset='Total del intercambio';apagados.clear();render();};
-  $('#bExpo').onclick=()=>{lado='EXPO';preset='Total del intercambio';apagados.clear();render();};
-  $('#presets').querySelectorAll('.opcion').forEach(b=>b.onclick=()=>{preset=b.dataset.p;render();});
-  $('#bTodos').onclick=()=>{apagados.clear();render();};
-  $('#bNinguno').onclick=()=>{G.forEach(g=>apagados.add(g));render();};
-
-  const P2=D.presets[lado][preset], w=pesosSector();
-  const orden=G.map((g,i)=>[g,P2.w[i],i]).sort((a,b)=>b[1]-a[1]);
-  $('#paises').innerHTML=orden.map(([g,,i])=>{
-    const off=apagados.has(g);
-    return `<label class="pais ${off?'apagado':''}"><input type="checkbox" data-g="${g}" ${off?'':'checked'}>
-      <span class="n">${g}</span><span class="w">${off?'—':((w?w[i]:0)*100).toFixed(1)}</span></label>`;
-  }).join('');
-  $('#paises').querySelectorAll('input').forEach(c=>c.onchange=()=>{
-    c.checked?apagados.delete(c.dataset.g):apagados.add(c.dataset.g); render(); });
+  return `
+  <div class="lado" role="group">
+    <button id="bImpo" aria-pressed="${lado==='IMPO'}"><strong>Importaciones</strong>
+      <span>${TEXTO_LADO.IMPO.bajada}</span></button>
+    <button id="bExpo" aria-pressed="${lado==='EXPO'}"><strong>Exportaciones</strong>
+      <span>${TEXTO_LADO.EXPO.bajada}</span></button>
+  </div>
+  <div class="cifras" id="cifras"></div>
+  <div class="grilla">
+    <main>
+      ${bloqueGrafico(preset==='Total del intercambio'? T.titulo+' del sector metalúrgico':preset,
+        T.sube,
+        `<div><i style="background:${AZUL}"></i>${preset} · ${T.titulo.toLowerCase()}</div>
+         <div id="claveBCRA" style="display:${verBCRA?'flex':'none'}">
+           <i style="background:${GRIS}"></i>Índice original del BCRA</div>`, true)}
+      <div class="caja"><h2>Con qué países se compara el peso, y cuánto pesa cada uno</h2>
+        <div class="cuerpo">
+          <div class="barra" id="barra"></div>
+          <div class="leyenda" id="leyenda"></div>
+          <div id="aviso"></div>
+        </div></div>
+    </main>
+    <aside>
+      <div class="caja"><h2>Países de la canasta</h2>
+        <div class="cuerpo">
+          <div class="paises" id="paises"></div>
+          <div class="acciones"><button id="bTodos">Todos</button><button id="bNinguno">Ninguno</button></div>
+        </div></div>
+      <div class="caja"><h2>Qué se está midiendo</h2>
+        <div class="cuerpo"><div id="presets">${out.join('')}</div></div></div>
+    </aside>
+  </div>
+  <p class="pie">Base 17 de diciembre de 2015 = 100. Cobertura del comercio del sector:
+    <span id="cobTxt"></span>.</p>`;
 }
 
-/* ---------- panel empresa ---------- */
-function filas(obj,id){
-  const w=norm(obj);
-  return G.map((g,i)=>{
-    const v=obj[g]||0;
-    return `<div class="fila ${v>0?'':'cero'}">
-      <span class="n">${g}</span>
-      <input type="number" min="0" step="1" data-c="${id}" data-g="${g}" value="${v||''}" placeholder="0" aria-label="${g}">
-      <span class="pc">${w&&w[i]>0?(w[i]*100).toFixed(0)+'%':'—'}</span></div>`;
-  }).join('');
-}
-function panelEmpresa(){
-  const sv=G.reduce((a,g)=>a+(+ventas[g]||0),0), sc=G.reduce((a,g)=>a+(+compras[g]||0),0);
-  $('#panel').innerHTML=`
-  <div class="caja"><h2>Adónde vendo</h2><div class="cuerpo">
-    <div class="canasta">${filas(ventas,'v')}</div>
-    <div class="suma"><span class="t">Suma cargada</span><span class="v">${sv.toFixed(0)}</span></div>
-    <div class="acciones">
-      <button data-carga="v-sector">Usar promedio del sector</button>
-      <button data-carga="v-cero">Borrar</button>
-    </div>
-  </div></div>
-  <div class="caja"><h2>De dónde compro insumos</h2><div class="cuerpo">
-    <div class="canasta">${filas(compras,'c')}</div>
-    <div class="suma"><span class="t">Suma cargada</span><span class="v">${sc.toFixed(0)}</span></div>
-    <div class="acciones">
-      <button data-carga="c-sector">Usar promedio del sector</button>
-      <button data-carga="c-cero">Borrar</button>
-    </div>
-  </div></div>`;
-
-  $('#panel').querySelectorAll('input').forEach(inp=>{
-    inp.oninput=()=>{
-      const o=inp.dataset.c==='v'?ventas:compras;
-      o[inp.dataset.g]=Math.max(0,+inp.value||0);
-      render({foco:inp.dataset.c+'|'+inp.dataset.g});
-    };
-  });
-  $('#panel').querySelectorAll('[data-carga]').forEach(b=>b.onclick=()=>{
-    const [c,acc]=b.dataset.carga.split('-');
-    const o=c==='v'?ventas:compras;
-    if(acc==='cero') G.forEach(g=>o[g]=0);
-    else { const base=D.presets[c==='v'?'EXPO':'IMPO']['Total del intercambio'].w;
-           G.forEach((g,i)=>o[g]=Math.round(base[i]*1000)/10); }
-    render();
-  });
+function vistaEmpresa(){
+  const P=D.presets[lado];
+  const ops=Object.keys(P).map(k=>`<option value="${k}" ${k===comparar?'selected':''}>${k}</option>`).join('');
+  return `
+  <div class="lado" role="group">
+    <button id="bImpo" aria-pressed="${lado==='IMPO'}"><strong>Mis compras al exterior</strong>
+      <span>Cargá de qué países importás y con qué peso en tus compras.</span></button>
+    <button id="bExpo" aria-pressed="${lado==='EXPO'}"><strong>Mis ventas al exterior</strong>
+      <span>Cargá a qué países exportás y con qué peso en tus ventas.</span></button>
+  </div>
+  <div class="cifras" id="cifras"></div>
+  <div class="grilla">
+    <main>
+      ${bloqueGrafico('Tu índice frente al del sector',
+        'Cargá tus porcentajes a la derecha y elegí contra qué compararte.',
+        `<div><i style="background:${AZUL}"></i>Tu canasta</div>
+         <div><i style="background:${AZUL2}"></i>${comparar}</div>`, false)}
+      <div class="caja"><h2>Comparar contra</h2>
+        <div class="cuerpo"><select id="selComp">${ops}</select><div id="aviso"></div></div></div>
+    </main>
+    <aside>
+      <div class="caja"><h2>Tu canasta, en porcentajes</h2>
+        <div class="cuerpo">
+          <div class="canasta" id="canastaLista"></div>
+          <div class="suma"><span>Suma cargada</span><span class="v" id="suma">0</span></div>
+          <div class="acciones"><button id="bProm">Promedio del sector</button>
+            <button id="bBorrar">Borrar</button></div>
+        </div></div>
+    </aside>
+  </div>
+  <p class="pie">No hace falta que los porcentajes sumen 100: la columna de la derecha muestra
+    la participación que efectivamente se usa. Solo aparecen los países que el índice cubre;
+    si comerciás con otros, esa parte no se puede representar.</p>`;
 }
 
-/* ---------- render ---------- */
-function render(op){
-  op=op||{};
-  if(modo==='sector') panelSector(); else panelEmpresa();
-  $('#mSector').setAttribute('aria-pressed', modo==='sector');
-  $('#mEmpresa').setAttribute('aria-pressed', modo==='empresa');
+/* ================= piezas ================= */
+function pintarBarra(w){
+  const b=$('#barra'); if(!b) return;
+  const seg=w?G.map((g,i)=>[g,w[i]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]):[];
+  b.innerHTML=seg.map(([g,v],k)=>
+    `<div class="seg" style="flex:${v} 0 0;background:${PAL[k%PAL.length]}"
+      title="${g}: ${(v*100).toFixed(1)}%"><span>${v>0.08?(v*100).toFixed(0)+'%':''}</span></div>`).join('');
+  $('#leyenda').innerHTML=seg.slice(0,9).map(([g,v],k)=>
+    `<div><i style="background:${PAL[k%PAL.length]}"></i>${g} <b>${(v*100).toFixed(1)}%</b></div>`).join('');
+}
 
-  const s=set(), k=corte();
-  fechas=s.fechas.slice(k);
-  const ref=s.itcrm.slice(k);
-  lineas=[]; let lect='', avisos='', pies='';
+const ultimo=a=>{ if(!a) return null; for(let i=a.length-1;i>=0;i--) if(a[i]!=null) return a[i]; return null; };
 
+function cifras(y,ref,etiqueta){
+  const v=ultimo(y);
+  if(v==null) return `<div class="cifra"><span class="k">${etiqueta}</span><span class="v">—</span>
+    <span class="n">cargá tus porcentajes</span></div>`;
+  const idx=[]; y.forEach((x,i)=>{ if(x!=null) idx.push(i); });
+  const atras=k=>{ const i=idx[idx.length-1-k]; return i==null?null:y[i]; };
+  const paso=granularidad==='diario'?21:1, anio=granularidad==='diario'?252:12;
+  const d=(a,b)=>(a==null||b==null)?null:(a/b-1)*100;
+  const vm=d(v,atras(paso)), va=d(v,atras(anio));
+  const cls=x=>x==null?'':(x>0?'pos':'neg');
+  const sg=x=>x==null?'—':(x>0?'+':'')+x.toFixed(1).replace('.',',')+'%';
+  let h=`<div class="cifra"><span class="k">${etiqueta}</span><span class="v">${fmt(v)}</span>
+      <span class="n">base dic-2015 = 100</span></div>
+    <div class="cifra"><span class="k">Variación mensual</span>
+      <span class="v ${cls(vm)}" style="font-size:26px">${sg(vm)}</span></div>
+    <div class="cifra"><span class="k">Variación interanual</span>
+      <span class="v ${cls(va)}" style="font-size:26px">${sg(va)}</span></div>`;
+  if(ref!=null){
+    const g=(v/ref-1)*100;
+    h+=`<div class="cifra"><span class="k">Frente al sector</span>
+      <span class="v ${cls(g)}" style="font-size:26px">${sg(g)}</span>
+      <span class="n">sector: ${fmt(ref)}</span></div>`;
+  }
+  return h;
+}
+
+function sincronizarSlider(){
+  const f=ejeFechas(), s0=$('#s0'), s1=$('#s1'); if(!s0) return;
+  s0.max=s1.max=f.length-1; s0.value=r0; s1.value=r1;
+  const a=r0/(f.length-1)*100, b=r1/(f.length-1)*100;
+  $('#act').style.left=a+'%'; $('#act').style.width=(b-a)+'%';
+  const et=x=>f[x].slice(0,7).replace('-','/');
+  $('#rangoTxt').textContent=et(r0)+' — '+et(r1);
+  document.querySelectorAll('.atajos [data-a]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.a===atajo));
+  document.querySelectorAll('.atajos [data-g]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===granularidad));
+}
+
+/* ================= render ================= */
+function render(foco){
+  $('#mSector').setAttribute('aria-pressed',modo==='sector');
+  $('#mEmpresa').setAttribute('aria-pressed',modo==='empresa');
+  $('#vista').innerHTML = modo==='sector'? vistaSector() : vistaEmpresa();
+
+  const f=ejeFechas();
+  if(r0==null||r1==null||r1>f.length-1) aplicarAtajo(atajo||'10a');
+
+  lineas=[];
   if(modo==='sector'){
-    const w=pesosSector(), y=serie(w);
-    lineas.push({y:ref,c:'#4FB8A8',w:1.2});
-    if(y) lineas.push({y:y.slice(k),c:'#FF7A2F',w:2});
-    $('#claves').innerHTML=`<div><i style="background:#FF7A2F"></i>${preset} · ${lado==='IMPO'?'importaciones':'exportaciones'}</div>
-      <div><i style="background:#4FB8A8"></i>ITCRM del BCRA</div>`;
-    const a=ult(y?y.slice(k):null), b=ult(ref);
-    lect=`<div class="dato"><span class="k">Índice armado</span><span class="v colado">${a==null?'—':a.toFixed(1)}</span></div>
-      <div class="dato"><span class="k">ITCRM BCRA</span><span class="v chico patina">${b==null?'—':b.toFixed(1)}</span></div>`;
-    if(a!=null&&b!=null){ const g=(a/b-1)*100;
-      lect+=`<div class="dato"><span class="k">Brecha</span><span class="v chico" style="color:${Math.abs(g)<1?'var(--tenue)':(g>0?'var(--patina)':'var(--alerta)')}">${(g>=0?'+':'')+g.toFixed(1)}%</span></div>`; }
-    pintarBarra(w,'Vector de ponderadores');
+    const rec=recorte(serieSector()); fechas=rec.f;
+    if(verBCRA){ const b=recorte(set().itcrm); lineas.push({y:b.y,c:GRIS,w:1.6,d:[5,4]}); }
+    lineas.push({y:rec.y,c:AZUL,w:2.4});
+    $('#cifras').innerHTML=cifras(rec.y,null,'Índice');
+    pintarBarra(pesosSector());
+
     const cob=D.presets[lado][preset].cobertura;
-    if(cob<0.70) avisos=`<div class="nota"><b>Cobertura ${(cob*100).toFixed(1)}%.</b>
-      Los 13 socios del BCRA explican menos del 70% de este flujo. Sirve para analizar, no para publicar.</div>`;
-    else if(apagados.size) avisos=`<div class="nota"><b>Canasta recortada.</b>
-      Sacaste ${apagados.size} socio${apagados.size>1?'s':''}; el resto se renormalizó a 100%.</div>`;
-    pies=`<p class="pie">El índice es el promedio geométrico ponderado de los tipos de cambio reales
-      bilaterales del BCRA: <code>I = Π ITCRB_j ^ w_j</code>. Rubros, familias y selección manual son
-      todos el mismo cálculo con distinto vector <code>w</code>.</p>`;
+    $('#cobTxt').textContent=(cob*100).toFixed(1)+'%';
+    let av='';
+    if(cob<0.70) av=`<div class="nota"><b>Cobertura ${(cob*100).toFixed(1)}%.</b>
+      Los países disponibles explican menos del 70% de este flujo, así que el dato es indicativo.</div>`;
+    else if(apagados.size) av=`<div class="nota"><b>Canasta modificada.</b>
+      Sacaste ${apagados.size} ${apagados.size>1?'países':'país'}. El resultado responde a qué
+      competitividad habría si el sector comerciara solo con los que quedaron, y ya no es el
+      índice del sector.</div>`;
+    $('#aviso').innerHTML=av;
+
+    const P=D.presets[lado][preset], w=pesosSector();
+    const orden=G.map((g,i)=>[g,P.w[i],i]).sort((a,b)=>b[1]-a[1]);
+    $('#paises').innerHTML=orden.map(([g,,i])=>{
+      const off=apagados.has(g);
+      return `<label class="pais ${off?'off':''}"><input type="checkbox" data-g="${g}" ${off?'':'checked'}>
+        <span class="n">${g}</span><span class="w">${off?'—':((w?w[i]:0)*100).toFixed(1)+'%'}</span></label>`;
+    }).join('');
+    $('#paises').querySelectorAll('input').forEach(c=>c.onchange=()=>{
+      c.checked?apagados.delete(c.dataset.g):apagados.add(c.dataset.g); render(); });
+    $('#presets').querySelectorAll('.opcion').forEach(b=>b.onclick=()=>{preset=b.dataset.p;render();});
+    $('#bTodos').onclick=()=>{apagados.clear();render();};
+    $('#bNinguno').onclick=()=>{G.forEach(g=>apagados.add(g));render();};
+    const ch=$('#chkBCRA'); if(ch) ch.onchange=()=>{verBCRA=ch.checked;render();};
   } else {
-    const wv=norm(ventas), wc=norm(compras);
-    const yv=serie(wv), yc=serie(wc);
-    lineas.push({y:ref,c:'#4FB8A8',w:1.2,d:[4,4]});
-    if(yv) lineas.push({y:yv.slice(k),c:'#FF7A2F',w:2});
-    if(yc) lineas.push({y:yc.slice(k),c:'#8FA8BC',w:2});
-    $('#claves').innerHTML=
-      `${wv?'<div><i style="background:#FF7A2F"></i>Canasta de ventas</div>':''}
-       ${wc?'<div><i style="background:#8FA8BC"></i>Canasta de insumos</div>':''}
-       <div><i style="background:#4FB8A8"></i>ITCRM del BCRA</div>`;
-    const a=ult(yv?yv.slice(k):null), b=ult(yc?yc.slice(k):null), r=ult(ref);
-    lect=`<div class="dato"><span class="k">Ventas</span><span class="v colado">${a==null?'—':a.toFixed(1)}</span></div>
-      <div class="dato"><span class="k">Insumos</span><span class="v chico acero">${b==null?'—':b.toFixed(1)}</span></div>`;
-    if(a!=null&&b!=null){
-      const rel=a/b*100;
-      lect+=`<div class="dato"><span class="k">Ventas / insumos</span><span class="v chico" style="color:${rel>100?'var(--patina)':'var(--alerta)'}">${rel.toFixed(1)}</span></div>`;
-    } else lect+=`<div class="dato"><span class="k">ITCRM BCRA</span><span class="v chico patina">${r==null?'—':r.toFixed(1)}</span></div>`;
-    pintarBarra(wv||wc, wv?'Canasta de ventas':'Canasta de insumos');
-    avisos=`<div class="nota info"><b>Solo 13 socios disponibles.</b>
-      Son los que el BCRA publica como bilaterales. Si tu empresa vende o compra fuera de esta lista,
-      esa parte no se puede representar todavía y lo que cargues se renormaliza sobre el resto.</div>`;
-    pies=`<p class="pie">Cargá los porcentajes como los tengas, no hace falta que sumen 100: la columna
-      de la derecha muestra la participación normalizada que efectivamente se usa.</p>
-      <p class="pie"><b style="color:var(--tenue)">Ventas / insumos</b> compara cómo se movió tu
-      competitividad de venta contra tu costo de insumos importados. Por encima de 100, el tipo de
-      cambio real jugó más a favor de lo que vendés que en contra de lo que comprás. Es un indicador
-      de exposición cambiaria, no un modelo de margen: no contempla insumos nacionales, aranceles,
-      retenciones ni la estructura de costos.</p>`;
+    const w=norm(canasta);
+    const ry=recorte(serie(w,null)); fechas=ry.f;
+    const rc=recorte(serie(null,nombreSerie(lado,comparar)));
+    lineas.push({y:rc.y,c:AZUL2,w:2});
+    lineas.push({y:ry.y,c:AZUL,w:2.4});
+    $('#cifras').innerHTML=cifras(ry.y, w?ultimo(rc.y):null, 'Tu índice');
+
+    $('#canastaLista').innerHTML=G.map((g,i)=>{
+      const v=canasta[g]||0;
+      return `<div class="fila ${v>0?'':'cero'}"><span class="n">${g}</span>
+        <input type="number" min="0" step="1" data-g="${g}" value="${v||''}" placeholder="0" aria-label="${g}">
+        <span class="pc">${w&&w[i]>0?(w[i]*100).toFixed(0)+'%':'—'}</span></div>`;
+    }).join('');
+    $('#suma').textContent=G.reduce((a,g)=>a+(+canasta[g]||0),0).toFixed(0);
+    $('#canastaLista').querySelectorAll('input').forEach(inp=>inp.oninput=()=>{
+      canasta[inp.dataset.g]=Math.max(0,+inp.value||0); render(inp.dataset.g); });
+    $('#selComp').onchange=e=>{comparar=e.target.value;render();};
+    $('#bProm').onclick=()=>{const b=D.presets[lado]['Total del intercambio'].w;
+      G.forEach((g,i)=>canasta[g]=Math.round(b[i]*1000)/10); render();};
+    $('#bBorrar').onclick=()=>{G.forEach(g=>canasta[g]=0); render();};
+    $('#aviso').innerHTML=`<div class="nota info">Tu canasta se compara contra <b>${comparar}</b>.
+      Por encima significa que tu combinación de países te dejó mejor parado que al promedio;
+      por debajo, peor.</div>`;
   }
 
-  $('#lectura').innerHTML=lect;
-  $('#aviso').innerHTML=avisos;
-  $('#pies').innerHTML=pies;
+  $('#bImpo').onclick=()=>{lado='IMPO';preset='Total del intercambio';comparar='Total del intercambio';apagados.clear();render();};
+  $('#bExpo').onclick=()=>{lado='EXPO';preset='Total del intercambio';comparar='Total del intercambio';apagados.clear();render();};
+  document.querySelectorAll('.atajos [data-a]').forEach(b=>b.onclick=()=>{aplicarAtajo(b.dataset.a);render();});
+  document.querySelectorAll('.atajos [data-g]').forEach(b=>b.onclick=()=>{
+    granularidad=b.dataset.g; aplicarAtajo(atajo||'10a'); render(); });
+  const s0=$('#s0'), s1=$('#s1');
+  if(s0){
+    s0.oninput=()=>{ r0=Math.min(+s0.value,r1-1); atajo=''; render(); };
+    s1.oninput=()=>{ r1=Math.max(+s1.value,r0+1); atajo=''; render(); };
+  }
+  sincronizarSlider();
   dibujar();
 
-  if(op.foco){
-    const [c,g]=op.foco.split('|');
-    const el=$(`input[data-c="${c}"][data-g="${CSS.escape(g)}"]`);
-    if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length); }
-  }
+  if(foco){ const el=$(`input[data-g="${CSS.escape(foco)}"]`);
+    if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length); } }
 }
 
 $('#mSector').onclick=()=>{modo='sector';render();};
 $('#mEmpresa').onclick=()=>{modo='empresa';render();};
-document.querySelectorAll('.rangos button').forEach(b=>b.onclick=()=>{
-  rango=b.dataset.r;
-  document.querySelectorAll('.rangos button').forEach(o=>o.setAttribute('aria-pressed',o===b));
-  render();
-});
 addEventListener('resize',dibujar);
 render();
 })();
