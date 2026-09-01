@@ -18,6 +18,12 @@ from tcrm_v3 import (ARCHIVOS, FAMILIAS, VENTANA_DEFECTO, VENTANAS, construir,
 BASE = Path(__file__).resolve().parent
 PLANTILLA = BASE / "plantilla"
 
+# Rubros que no se muestran en el tablero. Siguen calculandose y siguen en los
+# CSV y en el Excel; solo se ocultan de la interfaz. Buques y embarcaciones
+# tiene pocas operaciones y su vector de ponderadores se mueve 7,5% mensual,
+# seis veces mas que cualquier otro rubro.
+OCULTAR_RUBROS = {"Buques y embarcaciones"}
+
 
 def datos() -> dict:
     bil = matriz_bilaterales()
@@ -53,6 +59,8 @@ def datos() -> dict:
         for fam, rubros in FAMILIAS[lado].items():
             agregar(fam, df[df["rubro"].isin(rubros)], "familia")
         for rubro in df.groupby("rubro")["valor"].sum().sort_values(ascending=False).index:
+            if rubro in OCULTAR_RUBROS:
+                continue
             agregar(rubro, df[df["rubro"] == rubro], "rubro",
                     VENTANAS.get(rubro, VENTANA_DEFECTO))
         presets[lado] = entradas
