@@ -21,11 +21,11 @@
 body{background:var(--blanco);color:var(--tinta);
   font-family:var(--titulo);font-size:14px;line-height:1.5;
   -webkit-font-smoothing:antialiased}
-#app{max-width:1180px;margin:0 auto;padding:22px 22px 40px}
+#app{max-width:1180px;margin:0 auto;padding:18px 22px 30px}
 
 /* ---------- encabezado ---------- */
 .cab{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;
-  padding-bottom:14px;border-bottom:2px solid var(--azul);margin-bottom:20px}
+  padding-bottom:11px;border-bottom:2px solid var(--azul);margin-bottom:14px}
 .cab .t{flex:1 1 320px}
 .cab h1{font-size:26px;font-weight:700;color:var(--azul);letter-spacing:-.01em}
 .cab p{font-family:var(--sub);font-size:14.5px;color:var(--gris);margin-top:3px}
@@ -33,7 +33,7 @@ body{background:var(--blanco);color:var(--tinta);
 .logos img{height:34px;width:auto;display:block}
 
 /* ---------- pestanas de modo ---------- */
-.modos{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.modos{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .modos button{background:var(--blanco);border:1px solid var(--linea);
   color:var(--gris);cursor:pointer;font-family:var(--titulo);font-size:14px;
   font-weight:600;padding:9px 18px;border-radius:6px;transition:.15s}
@@ -43,44 +43,51 @@ body{background:var(--blanco);color:var(--tinta);
 .modos button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
 
 /* ---------- selector de lado ---------- */
-.lado{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.lado{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 @media(max-width:640px){.lado{grid-template-columns:1fr}}
-.lado button{text-align:left;background:var(--blanco);border:1.5px solid var(--linea);
-  border-radius:8px;padding:12px 16px;cursor:pointer;transition:.15s;
-  font-family:var(--titulo)}
+.lado button{display:flex;align-items:center;gap:8px;text-align:left;
+  background:var(--blanco);border:1.5px solid var(--linea);border-radius:7px;
+  padding:9px 14px;cursor:pointer;transition:.15s;font-family:var(--titulo)}
 .lado button:hover{border-color:var(--azul-suave)}
 .lado button[aria-pressed="true"]{border-color:var(--azul);background:var(--azul-tenue)}
-.lado button strong{display:block;font-size:15px;font-weight:700;color:var(--tinta)}
+.lado button strong{font-size:14px;font-weight:700;color:var(--tinta)}
 .lado button[aria-pressed="true"] strong{color:var(--azul)}
-.lado button span{display:block;font-family:var(--sub);font-size:12.5px;
-  color:var(--gris);margin-top:2px;line-height:1.35}
+.lado button .ayuda{margin-left:auto;width:16px;height:16px;border-radius:50%;
+  border:1.3px solid var(--gris-claro);color:var(--gris-claro);font-family:var(--sub);
+  font-size:10.5px;display:flex;align-items:center;justify-content:center;flex:none}
 .lado button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
 
 /* ---------- cifras ---------- */
 .cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:1px;background:var(--linea);border:1px solid var(--linea);
-  border-radius:8px;overflow:hidden;margin-bottom:16px}
-.cifra{background:var(--blanco);padding:14px 16px;text-align:center}
-.cifra .k{font-family:var(--sub);font-size:13px;color:var(--gris);display:block;
-  margin-bottom:4px}
-.cifra .v{font-size:30px;font-weight:700;line-height:1.1;color:var(--azul)}
+  border-radius:8px;overflow:hidden;margin-bottom:12px}
+.cifra{background:var(--blanco);padding:9px 14px;text-align:center}
+.cifra .k{font-family:var(--sub);font-size:12px;color:var(--gris);display:block;
+  margin-bottom:2px}
+.cifra .v{font-size:23px;font-weight:700;line-height:1.15;color:var(--azul)}
 .cifra .v.pos{color:var(--verde)} .cifra .v.neg{color:var(--rojo)}
-.cifra .n{font-family:var(--sub);font-size:11.5px;color:var(--gris-claro);
-  display:block;margin-top:3px}
+.cifra .n{font-family:var(--sub);font-size:11px;color:var(--gris-claro);
+  display:block;margin-top:2px}
 
 /* ---------- grilla ---------- */
 .grilla{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
 @media(max-width:900px){.grilla{grid-template-columns:1fr}}
 .caja{background:var(--blanco);border:1px solid var(--linea);border-radius:8px}
-.caja+.caja{margin-top:14px}
-.caja>h2{font-family:var(--sub);font-size:14px;font-weight:400;color:var(--tinta);
-  padding:12px 16px;border-bottom:1px solid var(--linea)}
-.cuerpo{padding:14px 16px}
+.caja+.caja{margin-top:10px}
+.caja>h2{font-family:var(--sub);font-size:13.5px;font-weight:400;color:var(--tinta);
+  padding:9px 14px;border-bottom:1px solid var(--linea)}
+.cuerpo{padding:11px 14px}
 
 /* ---------- listas ---------- */
 .eyebrow{font-family:var(--sub);font-size:11.5px;letter-spacing:.06em;
   text-transform:uppercase;color:var(--gris-claro);margin:14px 0 6px}
 .eyebrow:first-child{margin-top:0}
+
+/* pestañas internas de la caja de la derecha */
+.vertodos{width:100%;background:transparent;border:1px dashed var(--linea);color:var(--gris);
+  font-family:var(--sub);font-size:12px;padding:6px 0;border-radius:5px;cursor:pointer;
+  margin-top:4px;transition:.12s}
+.vertodos:hover{border-color:var(--azul-suave);color:var(--azul)}
 .opcion{display:flex;justify-content:space-between;gap:10px;width:100%;
   text-align:left;background:transparent;border:0;color:var(--tinta);
   cursor:pointer;padding:7px 10px;border-radius:5px;font-size:13.5px;
@@ -92,8 +99,8 @@ body{background:var(--blanco);color:var(--tinta);
 .opcion[aria-pressed="true"] .pz{color:var(--azul-medio)}
 .opcion:focus-visible{outline:2px solid var(--azul);outline-offset:-2px}
 
-.paises{display:flex;flex-direction:column;gap:1px;max-height:290px;
-  overflow-y:auto;padding-right:4px}
+.paises{display:flex;flex-direction:column;gap:0}
+.paises.scroll{max-height:230px;overflow-y:auto;padding-right:4px}
 .pais{display:grid;grid-template-columns:15px 1fr auto;align-items:center;
   gap:9px;padding:5px 8px;border-radius:4px;cursor:pointer;font-size:13px}
 .pais:hover{background:var(--panel)}
@@ -118,7 +125,7 @@ body{background:var(--blanco);color:var(--tinta);
 
 /* ---------- grafico ---------- */
 .gcab{display:flex;justify-content:space-between;align-items:center;gap:12px;
-  flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--linea)}
+  flex-wrap:wrap;padding:9px 14px;border-bottom:1px solid var(--linea)}
 .gcab h2{font-family:var(--sub);font-size:15px;color:var(--tinta);padding:0;border:0}
 .gcab .sub{font-family:var(--sub);font-size:12.5px;color:var(--gris-claro);
   display:block;margin-top:1px}
@@ -132,17 +139,29 @@ body{background:var(--blanco);color:var(--tinta);
 .check input:checked{background:var(--azul)}
 .check input:checked::after{left:17px}
 .check input:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
-canvas{display:block;width:100%;height:330px}
-@media(max-width:600px){canvas{height:250px}}
-.claves{display:flex;gap:18px;flex-wrap:wrap;padding:0 16px 12px;
-  font-family:var(--sub);font-size:12.5px;color:var(--gris)}
-.claves div{display:flex;align-items:center;gap:7px}
-.claves i{width:16px;height:3px;border-radius:2px;display:block}
+canvas{display:block;width:100%;height:300px}
+@media(max-width:600px){canvas{height:230px}}
+.claves{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;padding:0 14px 9px;font-family:var(--sub);font-size:12.5px;color:var(--gris)}
+#claves{display:flex;gap:16px;flex-wrap:wrap}
+.claves .l{display:flex;align-items:center;gap:7px}
+.claves i{width:16px;height:3px;border-radius:2px;display:block;flex:none}
+.comprel{position:relative}
+.comparabtn{background:transparent;border:1px dashed var(--azul-suave);color:var(--azul);
+  font-family:var(--sub);font-size:12px;padding:4px 11px;border-radius:12px;cursor:pointer;
+  transition:.12s;white-space:nowrap}
+.comparabtn:hover{background:var(--azul-tenue)}
+.comparabtn:focus-visible{outline:2px solid var(--azul)}
+.comparamenu{position:absolute;right:0;top:26px;z-index:40;width:250px;
+  background:#fff;border:1px solid var(--linea);border-radius:8px;
+  box-shadow:0 6px 20px rgba(0,0,0,.14);padding:8px}
+.comparamenu p{font-family:var(--sub);font-size:11px;color:var(--gris-claro);
+  padding:2px 6px 7px;line-height:1.4}
 
 /* ---------- selector de periodo ---------- */
-.periodo{padding:12px 16px 14px;border-top:1px solid var(--linea)}
+.periodo{padding:9px 16px 11px;border-top:1px solid var(--linea)}
 .pfila{display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:9px;flex-wrap:wrap;gap:8px}
+  margin-bottom:5px;flex-wrap:wrap;gap:8px}
 .pfila .et{font-family:var(--sub);font-size:12.5px;color:var(--gris)}
 .pfila .rango{font-family:var(--sub);font-size:13px;color:var(--azul);
   font-weight:600}
@@ -154,7 +173,7 @@ canvas{display:block;width:100%;height:330px}
 .atajos button[aria-pressed="true"]{background:var(--azul-tenue);
   border-color:var(--azul-suave);color:var(--azul);font-weight:600}
 .atajos button:focus-visible{outline:2px solid var(--azul)}
-.slider{position:relative;height:26px;margin:0 8px}
+.slider{position:relative;height:20px;margin:0 8px 2px}
 .slider .riel{position:absolute;top:11px;left:0;right:0;height:4px;
   background:var(--linea);border-radius:2px}
 .slider .activo{position:absolute;top:11px;height:4px;background:var(--azul);
@@ -270,7 +289,9 @@ let vista={gran:'mensual',i0:0,i1:0,fechas:[]};
 let modo='sector', lado='IMPO', preset='Total del intercambio',
     apagados=new Set(), comparaciones=new Set(), verBCRA=false,
     r0=null, r1=null, atajo='10a',
-    canasta=Object.fromEntries(G.map(g=>[g,0])), comparar='Total del intercambio';
+    canasta=Object.fromEntries(G.map(g=>[g,0])), comparar='Total del intercambio',
+    verTodosPaises=false;
+const TOPE_LISTA=6;
 
 const $=s=>document.querySelector(s);
 const fmt=v=>v==null?'—':v.toFixed(1).replace('.',',');
@@ -557,7 +578,7 @@ function ocultarTip(){
 }
 
 /* ================= vistas ================= */
-function bloqueGrafico(titulo,sub,claves,conBCRA){
+function bloqueGrafico(titulo,sub,claves,conBCRA,conComparar){
   return `<div class="caja">
     <div class="gcab">
       <div><h2>${titulo}</h2><span class="sub">${sub}</span></div>
@@ -567,22 +588,28 @@ function bloqueGrafico(titulo,sub,claves,conBCRA){
     <div class="cuerpo envoltorio" style="padding-bottom:4px">
       <canvas id="lienzo"></canvas><div class="tip" id="tip"></div>
     </div>
-    <div class="claves">${claves}</div>
+    <div class="claves" id="filaClaves">
+      <span id="claves">${claves}</span>
+      ${conComparar?`<span class="comprel">
+        <button class="comparabtn" id="bComparar">+ Comparar con otra serie</button>
+        <div class="comparamenu" id="comparaMenu" hidden></div>
+      </span>`:''}
+    </div>
     <div class="periodo">
-      <div class="pfila"><span class="et">Período</span><span class="rango" id="rangoTxt"></span></div>
       <div class="slider">
         <div class="riel"></div><div class="activo" id="act"></div>
         <input type="range" id="s0" min="0" step="1" aria-label="Desde">
         <input type="range" id="s1" min="0" step="1" aria-label="Hasta">
       </div>
-      <div class="pfila" style="margin:10px 0 0">
+      <div class="pfila">
         <div class="atajos" role="group">
           <button data-a="1a">1 año</button><button data-a="3a">3 años</button>
           <button data-a="10a">10 años</button><button data-a="20a">20 años</button>
           <button data-a="todo">Todo</button>
         </div>
-        <span class="et" id="granTxt"></span>
+        <span class="rango" id="rangoTxt"></span>
       </div>
+      <span class="et" id="granTxt" style="display:block;margin-top:3px"></span>
     </div>
   </div>`;
 }
@@ -602,16 +629,16 @@ function vistaSector(){
   return `
   <div class="lado" role="group">
     <button id="bImpo" aria-pressed="${lado==='IMPO'}"><strong>Importaciones</strong>
-      <span>${TEXTO_LADO.IMPO.bajada}</span></button>
+      <span class="ayuda" title="${TEXTO_LADO.IMPO.bajada}">?</span></button>
     <button id="bExpo" aria-pressed="${lado==='EXPO'}"><strong>Exportaciones</strong>
-      <span>${TEXTO_LADO.EXPO.bajada}</span></button>
+      <span class="ayuda" title="${TEXTO_LADO.EXPO.bajada}">?</span></button>
   </div>
   <div class="cifras" id="cifras"></div>
   <div class="grilla">
     <main>
       ${bloqueGrafico('Índice de tipo de cambio real metalúrgico',
         preset+' · '+T.titulo.toLowerCase(),
-        `<span id="claves"></span>`, true)}
+        `<span id="claves"></span>`, true, true)}
       <div class="caja"><h2>Con qué países se compara el peso, y cuánto pesa cada uno</h2>
         <div class="cuerpo">
           <div class="barra" id="barra"></div>
@@ -620,19 +647,13 @@ function vistaSector(){
         </div></div>
     </main>
     <aside>
+      <div class="caja"><h2>Qué se está midiendo</h2>
+        <div class="cuerpo"><div id="presets">${out.join('')}</div></div></div>
       <div class="caja"><h2>Países de la canasta</h2>
         <div class="cuerpo">
           <div class="paises" id="paises"></div>
+          <button class="vertodos" id="bVerTodos" hidden></button>
           <div class="acciones"><button id="bTodos">Todos</button><button id="bNinguno">Ninguno</button></div>
-        </div></div>
-      <div class="caja"><h2>Qué se está midiendo</h2>
-        <div class="cuerpo"><div id="presets">${out.join('')}</div></div></div>
-      <div class="caja"><h2>Comparar con</h2>
-        <div class="cuerpo">
-          <div class="paises" id="comparar" style="max-height:210px"></div>
-          <p style="font-family:var(--sub);font-size:11.5px;color:var(--gris-claro);
-            margin-top:9px;line-height:1.45">Hasta ${MAX_COMP} series de referencia. Las cifras
-            de arriba siguen describiendo la serie principal.</p>
         </div></div>
     </aside>
   </div>
@@ -647,9 +668,9 @@ function vistaEmpresa(){
   return `
   <div class="lado" role="group">
     <button id="bImpo" aria-pressed="${lado==='IMPO'}"><strong>Mis compras al exterior</strong>
-      <span>Cargá de qué países importás y con qué peso en tus compras.</span></button>
+      <span class="ayuda" title="Cargá de qué países importás y con qué peso en tus compras.">?</span></button>
     <button id="bExpo" aria-pressed="${lado==='EXPO'}"><strong>Mis ventas al exterior</strong>
-      <span>Cargá a qué países exportás y con qué peso en tus ventas.</span></button>
+      <span class="ayuda" title="Cargá a qué países exportás y con qué peso en tus ventas.">?</span></button>
   </div>
   <div class="cifras" id="cifras"></div>
   <div class="grilla">
@@ -721,6 +742,60 @@ function conectarGlobos(){
   });
 }
 
+function pintarPaises(){
+  const cont=$('#paises'); if(!cont) return;
+  const P=D.presets[lado][preset], w=pesosSector();
+  const orden=G.map((g,i)=>[g,P.w[i],i]).sort((a,b)=>b[1]-a[1]);
+  const corte = verTodosPaises? orden.length : Math.min(TOPE_LISTA,orden.length);
+  cont.classList.toggle('scroll', verTodosPaises && orden.length>10);
+  cont.innerHTML=orden.slice(0,corte).map(([g,,i])=>{
+    const off=apagados.has(g);
+    return `<label class="pais ${off?'off':''}"><input type="checkbox" data-g="${g}" ${off?'':'checked'}>
+      <span class="n">${g}</span><span class="w">${off?'—':((w?w[i]:0)*100).toFixed(1)+'%'}</span></label>`;
+  }).join('');
+  cont.querySelectorAll('input').forEach(c=>c.onchange=()=>{
+    c.checked?apagados.delete(c.dataset.g):apagados.add(c.dataset.g);
+    actualizar(); });
+  const vt=$('#bVerTodos');
+  if(vt){
+    if(orden.length>TOPE_LISTA){
+      vt.hidden=false;
+      vt.textContent = verTodosPaises? 'Ver menos' : `Ver los ${orden.length-TOPE_LISTA} restantes`;
+      // se reasigna en cada pintado: el boton no se reescribe, pero es la
+      // forma mas simple de garantizar que siempre quede enganchado
+      vt.onclick=()=>{ verTodosPaises=!verTodosPaises; pintarPaises(); };
+    } else vt.hidden=true;
+  }
+}
+
+// Menu flotante de "Comparar con", en vez de una tercera pestana permanente:
+// se usa poco, asi que no merece espacio fijo en la pantalla.
+function pintarMenuComparar(){
+  const menu=$('#comparaMenu'); if(!menu) return;
+  const opciones=Object.keys(D.presets[lado]).filter(k=>k!==preset)
+    .filter(k=>D.presets[lado][k].tipo!=='familia');
+  menu.innerHTML = `<p>Hasta ${MAX_COMP} series de referencia. Las cifras de arriba
+    siguen describiendo ${preset}.</p>` +
+    opciones.map(k=>{
+      const on=comparaciones.has(k);
+      const col=on?COMP[[...comparaciones].indexOf(k)%COMP.length]:null;
+      const lleno=!on && comparaciones.size>=MAX_COMP;
+      return `<label class="pais ${on?'':'off'}" ${lleno?'style="opacity:.4"':''}>
+        <input type="checkbox" data-c="${k}" ${on?'checked':''} ${lleno?'disabled':''}>
+        <span class="n">${k}</span>
+        <span class="w">${on?`<i style="display:inline-block;width:14px;height:3px;
+          border-radius:2px;background:${col}"></i>`:''}</span></label>`;
+    }).join('');
+  menu.querySelectorAll('input').forEach(c=>c.onchange=()=>{
+    c.checked? comparaciones.add(c.dataset.c) : comparaciones.delete(c.dataset.c);
+    actualizar(); });
+}
+function toggleMenuComparar(){
+  const menu=$('#comparaMenu'); if(!menu) return;
+  menu.hidden=!menu.hidden;
+  if(!menu.hidden) pintarMenuComparar();
+}
+
 function pintarBarra(w){
   const b=$('#barra'); if(!b) return;
   const seg=w?G.map((g,i)=>[g,w[i]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]):[];
@@ -783,19 +858,19 @@ function cifras(y,ref,etiqueta){
 
     <div class="cifra" data-tip="${tipProm.replace(/"/g,'&quot;')}">
       <span class="k">Frente al promedio del período</span>
-      <span class="v ${cls(dist)}" style="font-size:26px">${sg(dist)}</span>
+      <span class="v ${cls(dist)}" style="font-size:20px">${sg(dist)}</span>
       <span class="n">promedio de ${tramoTxt}: ${fmt(prom)}</span></div>
 
     <div class="cifra" data-tip="${tipPos.replace(/"/g,'&quot;')}">
       <span class="k">Posición en el período</span>
-      <span class="v" style="font-size:26px">${pordebajo==null?'—':pordebajo+' de '+val.length}</span>
-      <span class="n">${unidad} estuvieron por debajo del nivel actual</span>
-      ${mn==null?'':`<div class="rangoviz"><div class="p" style="left:${pos.toFixed(1)}%"></div></div>
-      <div class="ext"><span>mín ${fmt(mn)}</span><span>máx ${fmt(mx)}</span></div>`}</div>
+      <span class="v" style="font-size:20px">${pordebajo==null?'—':pordebajo+' de '+val.length}</span>
+      <span class="n">${pordebajo==null?'':unidad+' por debajo del actual'}</span>
+      ${mn==null?'':`<div class="rangoviz"><div class="p" style="left:${pos.toFixed(1)}%"></div></div>`}
+    </div>
 
     <div class="cifra" data-tip="${tipIA.replace(/"/g,'&quot;')}">
       <span class="k">Variación interanual</span>
-      <span class="v ${cls(va)}" style="font-size:26px">${sg(va)}</span>
+      <span class="v ${cls(va)}" style="font-size:20px">${sg(va)}</span>
       <span class="n">${iAnt==null?'sin dato de un año atrás':'contra '+etiquetaFecha(iAnt)}</span></div>`;
 
   if(ref!=null){
@@ -803,7 +878,7 @@ function cifras(y,ref,etiqueta){
     h+=`<div class="cifra" data-tip="Diferencia de nivel entre tu índice y el del sector, medida
       siempre en la última fecha con dato, sin importar el período que estés mirando.">
       <span class="k">Frente al sector</span>
-      <span class="v ${cls(g)}" style="font-size:26px">${sg(g)}</span>
+      <span class="v ${cls(g)}" style="font-size:20px">${sg(g)}</span>
       <span class="n">al dato más reciente (${ref.fecha}): ${fmt(ref.valor)}</span></div>`;
   }
   return h;
@@ -864,8 +939,14 @@ function actualizar(){
     $('#cifras').innerHTML=cifras(rec,null,'Índice');
     const cl=$('#claves');
     if(cl) cl.innerHTML=lineas.slice().reverse().map(l=>
-      `<div><i style="background:${l.c}"></i>${l.et}</div>`).join('')
-      + `<div style="color:var(--gris-claro)">${TEXTO_LADO[lado].titulo.toLowerCase()}</div>`;
+      `<span class="l"><i style="background:${l.c}"></i>${l.et}</span>`).join('')
+      + `<span class="l" style="color:var(--gris-claro)">${TEXTO_LADO[lado].titulo.toLowerCase()}</span>`;
+    // boton x pais eliminado del menu si ya esta activo, con tope de MAX_COMP
+    const btn=$('#bComparar');
+    if(btn){
+      btn.hidden = comparaciones.size>=MAX_COMP;
+      btn.onclick=e=>{ e.stopPropagation(); toggleMenuComparar(); };
+    }
   } else {
     const w=norm(canasta);
     const full=serie(w,null);
@@ -890,7 +971,7 @@ function actualizar(){
     }
     $('#cifras').innerHTML=cifras(ry, refSec, 'Tu índice');
   }
-  if(modo==='empresa') refrescarCanasta(); else refrescarPaises();
+  if(modo==='empresa') refrescarCanasta(); else { refrescarPaises(); pintarMenuComparar(); }
   sincronizarSlider();
   dibujar();
   // las cifras se reescriben en cada actualizacion, asi que los globos hay que
@@ -906,7 +987,10 @@ function actualizar(){
 function refrescarPaises(){
   const w=pesosSector(), P=D.presets[lado][preset];
   const orden=G.map((g,i)=>[g,P.w[i],i]).sort((a,b)=>b[1]-a[1]);
-  document.querySelectorAll('#paises .pais').forEach((fila,k)=>{
+  const filas=document.querySelectorAll('#paises .pais');
+  const corte=verTodosPaises?orden.length:Math.min(TOPE_LISTA,orden.length);
+  if(filas.length!==corte){ pintarPaises(); }
+  else filas.forEach((fila,k)=>{
     const [g,,i]=orden[k]||[]; if(g==null) return;
     const off=apagados.has(g);
     fila.classList.toggle('off',off);
@@ -966,26 +1050,9 @@ function render(){
       c.checked?apagados.delete(c.dataset.g):apagados.add(c.dataset.g);
       actualizar(); });
     $('#presets').querySelectorAll('.opcion').forEach(b=>b.onclick=()=>{
-      preset=b.dataset.p; comparaciones.delete(preset); render(); });
+      preset=b.dataset.p; comparaciones.delete(preset); verTodosPaises=false; render(); });
 
-    // lista de series de referencia, sin la principal
-    const cmp=$('#comparar');
-    if(cmp){
-      const lleno=comparaciones.size>=MAX_COMP;
-      cmp.innerHTML=Object.keys(D.presets[lado]).filter(k=>k!==preset)
-        .filter(k=>D.presets[lado][k].tipo!=='familia')
-        .map(k=>{
-          const on=comparaciones.has(k), col=on?COMP[[...comparaciones].indexOf(k)%COMP.length]:null;
-          return `<label class="pais ${on?'':'off'}" ${(!on&&lleno)?'style="opacity:.45"':''}>
-            <input type="checkbox" data-c="${k}" ${on?'checked':''} ${(!on&&lleno)?'disabled':''}>
-            <span class="n">${k}</span>
-            <span class="w">${on?`<i style="display:inline-block;width:14px;height:3px;
-              border-radius:2px;background:${col}"></i>`:''}</span></label>`;
-        }).join('');
-      cmp.querySelectorAll('input').forEach(c=>c.onchange=()=>{
-        c.checked? comparaciones.add(c.dataset.c) : comparaciones.delete(c.dataset.c);
-        render(); });
-    }
+    pintarMenuComparar();
     $('#bTodos').onclick=()=>{apagados.clear();render();};
     $('#bNinguno').onclick=()=>{G.forEach(g=>apagados.add(g));render();};
     const ch=$('#chkBCRA'); if(ch) ch.onchange=()=>{verBCRA=ch.checked;actualizar();};
@@ -1020,7 +1087,7 @@ function render(){
   }
 
   const cambiarLado=l=>{ lado=l; preset='Total del intercambio'; comparar='Total del intercambio';
-    apagados.clear(); comparaciones.clear(); render(); };
+    apagados.clear(); comparaciones.clear(); verTodosPaises=false; render(); };
   $('#bImpo').onclick=()=>cambiarLado('IMPO');
   $('#bExpo').onclick=()=>cambiarLado('EXPO');
   document.querySelectorAll('.atajos [data-a]').forEach(b=>b.onclick=()=>{aplicarAtajo(b.dataset.a);actualizar();});
@@ -1040,6 +1107,11 @@ function render(){
 
   actualizar();
 }
+
+document.addEventListener('click',e=>{
+  const menu=$('#comparaMenu'), btn=$('#bComparar');
+  if(menu && !menu.hidden && !menu.contains(e.target) && e.target!==btn) menu.hidden=true;
+});
 
 $('#mSector').onclick=()=>{modo='sector';render();};
 $('#mEmpresa').onclick=()=>{modo='empresa';render();};
