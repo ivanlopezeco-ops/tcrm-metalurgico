@@ -216,26 +216,65 @@ select:focus{outline:2px solid var(--azul);outline-offset:-1px}
 .nota.info b{color:var(--azul)}
 .pie{margin-top:18px;padding-top:14px;border-top:1px solid var(--linea);
   font-family:var(--sub);font-size:12.5px;color:var(--gris-claro);line-height:1.6}
+
+/* barra de posicion dentro del periodo */
+.rangoviz{margin-top:7px;height:5px;background:var(--linea);border-radius:3px;
+  position:relative}
+.rangoviz .p{position:absolute;top:-3px;width:11px;height:11px;border-radius:50%;
+  background:var(--azul);border:2px solid #fff;transform:translateX(-50%);
+  box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.rangoviz .ext{display:flex;justify-content:space-between;margin-top:7px;
+  font-family:var(--sub);font-size:10.5px;color:var(--gris-claro)}
+.cifra[data-tip]{cursor:help}
+
+/* globo explicativo sobre las opciones */
+.globo{position:fixed;z-index:60;max-width:280px;background:var(--tinta);color:#fff;
+  font-family:var(--sub);font-size:12.5px;line-height:1.5;padding:9px 12px;
+  border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none;
+  opacity:0;transition:opacity .12s}
+.globo.ver{opacity:1}
+.globo b{color:#fff;font-weight:600}
+.globo .cc{display:block;margin-top:5px;color:var(--azul-suave)}
+
+/* globo del grafico */
+.envoltorio{position:relative}
+.tip{position:absolute;z-index:50;background:#fff;border:1px solid var(--linea);
+  border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:9px 12px;
+  font-family:var(--sub);font-size:12.5px;pointer-events:none;opacity:0;
+  transition:opacity .1s;min-width:150px}
+.tip.ver{opacity:1}
+.tip .f{color:var(--gris-claro);font-size:11.5px;margin-bottom:4px}
+.tip .l{display:flex;justify-content:space-between;gap:14px;margin-top:2px}
+.tip .l i{width:9px;height:3px;border-radius:2px;display:inline-block;
+  margin-right:6px;vertical-align:middle}
+.tip .l b{font-weight:600;color:var(--tinta)}
+.tip .extra{margin-top:6px;padding-top:5px;border-top:1px solid var(--linea);
+  color:var(--gris);font-size:11.5px}
 </style>
 
 <script>
 (function(){
 const D=window.DATOS, G=D.grupos;
-const PAL=['#414FB1','#5763BB','#6E78C6','#848DD0','#9BA2DA','#B1B7E5','#C8CCEF',
-           '#8C95A4','#9DA5B2','#AEB5C0','#BFC5CE','#D0D4DB','#E1E4E9'];
+// Paleta categorica: el azul institucional encabeza, y el resto son tonos
+// distinguibles entre si. Una gama de un solo color no permite diferenciar
+// paises en la leyenda.
+const PAL=['#414FB1','#E08A3C','#2E8B74','#A34B7D','#6B8FD4','#B8873B',
+           '#4C7A9E','#8C5E9E','#C4574A','#5A9E6F','#3E6B8A','#D4A24C','#7A7F8C'];
 const AZUL='#414FB1', AZUL2='#A8AEDD', GRIS='#9CA3AF';
+// hasta tres lineas de referencia, en tonos distinguibles del azul principal
+const COMP=['#E08A3C','#2E8B74','#A34B7D'];
+const MAX_COMP=3;
 
 const TEXTO_LADO={
   IMPO:{titulo:'Importaciones',
-        bajada:'Qué tan caro resulta comprar afuera. Se pondera por el origen de las compras del sector.',
-        sube:'Cuanto más alto, más caro importar y mejor compite la producción nacional.'},
+        bajada:'Ponderado por el origen de las compras del sector al exterior.'},
   EXPO:{titulo:'Exportaciones',
-        bajada:'Qué tan competitivo es vender afuera. Se pondera por el destino de las ventas del sector.',
-        sube:'Cuanto más alto, más conveniente exportar frente a los competidores.'}
+        bajada:'Ponderado por el destino de las ventas del sector al exterior.'}
 };
 
+let vista={gran:'mensual',i0:0,i1:0,fechas:[]};
 let modo='sector', lado='IMPO', preset='Total del intercambio',
-    apagados=new Set(), verBCRA=false, granularidad='mensual',
+    apagados=new Set(), comparaciones=new Set(), verBCRA=false,
     r0=null, r1=null, atajo='10a',
     canasta=Object.fromEntries(G.map(g=>[g,0])), comparar='Total del intercambio';
 
@@ -246,7 +285,7 @@ document.getElementById('app').innerHTML=`
 <header class="cab">
   <div class="t">
     <h1>Tipo de cambio real metalúrgico</h1>
-    <p>Cuánto vale el peso frente a las monedas con las que realmente comercia la metalurgia argentina</p>
+    <p>Cuánto vale el peso frente a las monedas con las que realmente comercia el sector metalúrgico</p>
   </div>
   <div class="logos">
     <img src="https://res.cloudinary.com/dst2iprcr/image/upload/v1778116908/LOGO_ADIMRA_PNG_pc5a15.png" alt="ADIMRA">
@@ -259,7 +298,8 @@ document.getElementById('app').innerHTML=`
   <button id="mEmpresa" aria-pressed="false">Armá tu propio TCRM</button>
 </div>
 
-<div id="vista"></div>`;
+<div id="vista"></div>
+<div class="globo" id="globo"></div>`;
 
 /* ================= calculo ================= */
 function norm(obj){
@@ -272,7 +312,6 @@ function pesosSector(){
   const s=w.reduce((a,b)=>a+b,0);
   return s>0? w.map(v=>v/s):null;
 }
-function set(){ return granularidad==='diario'? D.diario : D.mensual; }
 
 function encadenar(s,w){
   if(!w) return null;
@@ -321,7 +360,7 @@ function anclar(y,fechas,esDiario,w){
   return y;
 }
 function oficial(nombre){
-  const o=D.oficiales&&D.oficiales[granularidad==='diario'?'diario':'mensual'];
+  const o=D.oficiales&&D.oficiales[vista.gran];
   return (o&&o[nombre])?o[nombre]:null;
 }
 const nombreSerie=(l,p)=> p==='Total del intercambio'? l+' total' : l+' - '+p;
@@ -329,47 +368,92 @@ const nombreSerie=(l,p)=> p==='Total del intercambio'? l+' total' : l+' - '+p;
 function serie(w,nombreOficial){
   if(nombreOficial){ const o=oficial(nombreOficial); if(o) return o; }
   const s=set();
-  return anclar(encadenar(s,w),s.fechas,granularidad==='diario',w);
+  return anclar(encadenar(s,w),s.fechas,vista.gran==='diario',w);
 }
 function serieSector(){
   if(!apagados.size) return serie(null,nombreSerie(lado,preset));
   return serie(pesosSector(),null);
 }
 
-/* ================= periodo ================= */
-const ejeFechas=()=>set().fechas;
+/* ================= periodo y granularidad ================= */
+
+// El selector de periodo trabaja SIEMPRE sobre el eje mensual, que da 356
+// posiciones: suficiente resolucion y estable aunque cambie la granularidad
+// con que se dibuja. r0 y r1 son indices de ese eje.
+const ejeMensual=()=>D.mensual.fechas;
+const MESES_DIARIO=36;   // hasta este tramo se dibuja dia por dia
+
 function aplicarAtajo(a){
-  const f=ejeFechas(); atajo=a;
+  const f=ejeMensual(); atajo=a;
   if(a==='todo'){ r0=0; r1=f.length-1; return; }
-  const anios={'3a':3,'10a':10,'20a':20}[a]||10;
+  const anios={'1a':1,'3a':3,'10a':10,'20a':20}[a]||10;
   const c=new Date(); c.setFullYear(c.getFullYear()-anios);
   const iso=c.toISOString().slice(0,10);
   let i=f.findIndex(d=>d>=iso); if(i<0) i=0;
   r0=i; r1=f.length-1;
 }
-function recorte(y){
-  const f=ejeFechas();
-  const a=Math.max(0,Math.min(r0,f.length-1)), b=Math.max(a+1,Math.min(r1,f.length-1));
-  return {f:f.slice(a,b+1), y:y?y.slice(a,b+1):null};
+
+// Devuelve el tramo a dibujar y con que detalle. La granularidad se decide
+// sola: tramos cortos se ven dia por dia, tramos largos por mes. Asi la
+// densidad de puntos es uniforme dentro de cada vista, el eje temporal no se
+// deforma y las medidas no quedan dominadas por el tramo mas reciente.
+function tramo(){
+  const M=ejeMensual();
+  if(r0==null||r1==null||r1>M.length-1) aplicarAtajo(atajo||'10a');
+  const desde=M[r0].slice(0,7)+'-01', hasta=M[r1];
+  const meses=r1-r0;
+
+  let gran='mensual';
+  if(meses<=MESES_DIARIO){
+    const dd=D.diario.fechas;
+    if(dd.length && dd[0]<=desde) gran='diario';
+  }
+  const eje = gran==='diario'? D.diario.fechas : M;
+  let i0=0;  while(i0<eje.length-1 && eje[i0]<desde) i0++;
+  let i1=eje.length-1; while(i1>0 && eje[i1]>hasta) i1--;
+  if(i1<=i0) i1=Math.min(eje.length-1,i0+1);
+  return {gran,i0,i1,fechas:eje.slice(i0,i1+1),meses};
+}
+
+const set=()=>vista.gran==='diario'? D.diario : D.mensual;
+const recorte=y=>y? y.slice(vista.i0,vista.i1+1) : null;
+
+// Indice del punto de hace un anio, buscado por FECHA y no por cantidad de
+// posiciones: asi funciona igual en mensual y en diario.
+function haceUnAnio(i){
+  const f=vista.fechas; if(!f[i]) return null;
+  const d=new Date(f[i]); d.setFullYear(d.getFullYear()-1);
+  const obj=d.toISOString().slice(0,10);
+  for(let k=i;k>=0;k--) if(f[k]<=obj) return k;
+  return null;
 }
 
 /* ================= grafico ================= */
-let lineas=[], fechas=[];
+let lineas=[], fechas=[], mapaX=null, resaltado=null;
+
 function dibujar(){
   const cv=document.getElementById('lienzo'); if(!cv) return;
   const cx=cv.getContext('2d');
   const dpr=devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
   cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0); cx.clearRect(0,0,W,H);
-  const m={t:16,r:14,b:28,l:46}, pw=W-m.l-m.r, ph=H-m.t-m.b;
+  const m={t:16,r:14,b:28,l:52}, pw=W-m.l-m.r, ph=H-m.t-m.b;
   const ff=getComputedStyle(document.body).fontFamily;
   const todos=lineas.flatMap(l=>l.y||[]).filter(v=>v!=null);
   if(!todos.length||fechas.length<2){
     cx.fillStyle='#8C95A4'; cx.font='13px '+ff; cx.textAlign='center';
-    cx.fillText('Elegí al menos un país', W/2, H/2); return;
+    cx.fillText('Elegí al menos un país', W/2, H/2); mapaX=null; return;
   }
+
+  // promedio del periodo visible, sobre la serie principal
+  const princ=lineas[lineas.length-1].y||[];
+  const val=princ.filter(v=>v!=null);
+  const prom=val.length? val.reduce((a,b)=>a+b,0)/val.length : null;
+
   let lo=Math.min(...todos), hi=Math.max(...todos);
+  if(prom!=null){ lo=Math.min(lo,prom); hi=Math.max(hi,prom); }
   const p=(hi-lo)*0.12||5; lo-=p; hi+=p;
   const X=i=>m.l+(i/(fechas.length-1))*pw, Y=v=>m.t+(1-(v-lo)/(hi-lo))*ph;
+  mapaX={X,Y,m,pw,ph,W,H,lo,hi};
 
   cx.strokeStyle='#EDF0F4'; cx.lineWidth=1; cx.fillStyle='#8C95A4';
   cx.font='11px '+ff; cx.textAlign='right';
@@ -378,12 +462,28 @@ function dibujar(){
     cx.beginPath(); cx.moveTo(m.l,y); cx.lineTo(W-m.r,y); cx.stroke();
     cx.fillText(v.toFixed(0), m.l-8, y+4);
   }
-  if(lo<100&&hi>100){
-    const y=Math.round(Y(100))+.5;
-    cx.save(); cx.setLineDash([4,4]); cx.strokeStyle='#C8CCEF';
-    cx.beginPath(); cx.moveTo(m.l,y); cx.lineTo(W-m.r,y); cx.stroke(); cx.restore();
+
+  // rotulo del eje: deja explicita la base del indice
+  cx.save(); cx.translate(13,m.t+ph/2); cx.rotate(-Math.PI/2);
+  cx.textAlign='center'; cx.fillStyle='#8C95A4'; cx.font='11px '+ff;
+  cx.fillText('Índice, base 17-dic-2015 = 100',0,0); cx.restore();
+
+  // linea de promedio del periodo seleccionado
+  if(prom!=null){
+    const y=Math.round(Y(prom))+.5;
+    cx.save(); cx.setLineDash([5,4]); cx.strokeStyle='#B1B7E5'; cx.lineWidth=1.3;
+    cx.beginPath(); cx.moveTo(m.l,y); cx.lineTo(W-m.r,y); cx.stroke();
+    cx.setLineDash([]);
+    const et='Promedio del período: '+prom.toFixed(1).replace('.',',');
+    cx.font='11px '+ff; const an=cx.measureText(et).width;
+    cx.fillStyle='rgba(255,255,255,.92)';
+    cx.fillRect(W-m.r-an-8, y-14, an+8, 13);
+    cx.fillStyle='#7079C7'; cx.textAlign='right';
+    cx.fillText(et, W-m.r-3, y-4);
+    cx.restore();
   }
-  cx.textAlign='center';
+
+  cx.textAlign='center'; cx.fillStyle='#8C95A4'; cx.font='11px '+ff;
   const paso=Math.max(1,Math.floor(fechas.length/6));
   for(let i=0;i<fechas.length;i+=paso)
     cx.fillText(fechas.length>400?fechas[i].slice(0,4):fechas[i].slice(0,7), X(i), H-9);
@@ -397,6 +497,69 @@ function dibujar(){
       const x=X(i), y=Y(v); if(mov){cx.moveTo(x,y);mov=false;} else cx.lineTo(x,y); });
     cx.stroke(); cx.setLineDash([]);
   });
+
+  // cruceta y puntos al pasar el mouse
+  if(resaltado!=null && resaltado>=0 && resaltado<fechas.length){
+    const x=X(resaltado);
+    cx.save(); cx.strokeStyle='#C8CCEF'; cx.lineWidth=1; cx.setLineDash([3,3]);
+    cx.beginPath(); cx.moveTo(x,m.t); cx.lineTo(x,m.t+ph); cx.stroke(); cx.restore();
+    lineas.forEach(l=>{
+      const v=l.y&&l.y[resaltado]; if(v==null) return;
+      cx.beginPath(); cx.arc(x,Y(v),4,0,Math.PI*2);
+      cx.fillStyle='#fff'; cx.fill();
+      cx.strokeStyle=l.c; cx.lineWidth=2.2; cx.stroke();
+    });
+  }
+}
+
+/* ---------- interaccion con el grafico ---------- */
+function indiceDesdeX(px){
+  if(!mapaX||fechas.length<2) return null;
+  const {m,pw}=mapaX;
+  const r=Math.round((px-m.l)/pw*(fechas.length-1));
+  return Math.max(0,Math.min(fechas.length-1,r));
+}
+function mostrarTip(ev){
+  const cv=document.getElementById('lienzo'), tip=document.getElementById('tip');
+  if(!cv||!tip||!mapaX) return;
+  const r=cv.getBoundingClientRect();
+  const i=indiceDesdeX(ev.clientX-r.left);
+  if(i==null){ ocultarTip(); return; }
+  resaltado=i; dibujar();
+
+  const princ=lineas[lineas.length-1];
+  const v=princ.y?princ.y[i]:null;
+  if(v==null){ ocultarTip(); return; }
+
+  const et=fechas[i].length>7 ? fechas[i].split('-').reverse().join('/')
+                              : fechas[i].slice(0,7).replace('-','/');
+  let h=`<div class="f">${et}</div>`;
+  lineas.slice().reverse().forEach(l=>{
+    const x=l.y?l.y[i]:null; if(x==null) return;
+    h+=`<div class="l"><span><i style="background:${l.c}"></i>${l.et||''}</span><b>${fmt(x)}</b></div>`;
+  });
+  // interanual y distancia al promedio del periodo, en ese punto
+  const pc=x=>(x>0?'+':'')+x.toFixed(1).replace('.',',')+'%';
+  let extra='';
+  const iAnt=haceUnAnio(i);
+  if(iAnt!=null && princ.y[iAnt]!=null) extra+='Interanual '+pc((v/princ.y[iAnt]-1)*100);
+  const val=(princ.y||[]).filter(x=>x!=null);
+  if(val.length>3){
+    const prom=val.reduce((a,b)=>a+b,0)/val.length;
+    extra+=(extra?'<br>':'')+'Frente al promedio del período '+pc((v/prom-1)*100);
+  }
+  if(extra) h+=`<div class="extra">${extra}</div>`;
+  tip.innerHTML=h; tip.classList.add('ver');
+  const cont=cv.parentElement.getBoundingClientRect();
+  let px=mapaX.X(i)+16;
+  if(px+tip.offsetWidth>cont.width-8) px=mapaX.X(i)-tip.offsetWidth-16;
+  tip.style.left=Math.max(4,px)+'px';
+  tip.style.top=Math.max(4,mapaX.Y(v)-tip.offsetHeight/2)+'px';
+}
+function ocultarTip(){
+  const tip=document.getElementById('tip');
+  if(tip) tip.classList.remove('ver');
+  if(resaltado!=null){ resaltado=null; dibujar(); }
 }
 
 /* ================= vistas ================= */
@@ -407,7 +570,9 @@ function bloqueGrafico(titulo,sub,claves,conBCRA){
       ${conBCRA?`<label class="check"><input type="checkbox" id="chkBCRA" ${verBCRA?'checked':''}>
         Ver también el índice original del BCRA</label>`:''}
     </div>
-    <div class="cuerpo" style="padding-bottom:4px"><canvas id="lienzo"></canvas></div>
+    <div class="cuerpo envoltorio" style="padding-bottom:4px">
+      <canvas id="lienzo"></canvas><div class="tip" id="tip"></div>
+    </div>
     <div class="claves">${claves}</div>
     <div class="periodo">
       <div class="pfila"><span class="et">Período</span><span class="rango" id="rangoTxt"></span></div>
@@ -418,12 +583,11 @@ function bloqueGrafico(titulo,sub,claves,conBCRA){
       </div>
       <div class="pfila" style="margin:10px 0 0">
         <div class="atajos" role="group">
-          <button data-a="3a">3 años</button><button data-a="10a">10 años</button>
-          <button data-a="20a">20 años</button><button data-a="todo">Todo</button>
+          <button data-a="1a">1 año</button><button data-a="3a">3 años</button>
+          <button data-a="10a">10 años</button><button data-a="20a">20 años</button>
+          <button data-a="todo">Todo</button>
         </div>
-        <div class="atajos" role="group">
-          <button data-g="mensual">Mensual</button><button data-g="diario">Diario</button>
-        </div>
+        <span class="et" id="granTxt"></span>
       </div>
     </div>
   </div>`;
@@ -435,11 +599,10 @@ function vistaSector(){
     const it=Object.entries(P).filter(([,v])=>v.tipo===tipo);
     if(!it.length) return;
     out.push(`<p class="eyebrow">${t}</p>`);
-    it.forEach(([k,v])=>out.push(`<button class="opcion" data-p="${k}" aria-pressed="${k===preset}">
-      <span>${k}</span><span class="pz">${(v.peso*100).toFixed(tipo==='total'?0:1)}%</span></button>`));
+    it.forEach(([k])=>out.push(`<button class="opcion" data-p="${k}" aria-pressed="${k===preset}">
+      <span>${k}</span></button>`));
   };
   grupo('Todo el sector','total');
-  grupo('Por perfil de origen o destino','familia');
   grupo('Por rubro','rubro');
 
   return `
@@ -452,11 +615,9 @@ function vistaSector(){
   <div class="cifras" id="cifras"></div>
   <div class="grilla">
     <main>
-      ${bloqueGrafico(preset==='Total del intercambio'? T.titulo+' del sector metalúrgico':preset,
-        T.sube,
-        `<div><i style="background:${AZUL}"></i>${preset} · ${T.titulo.toLowerCase()}</div>
-         <div id="claveBCRA" style="display:${verBCRA?'flex':'none'}">
-           <i style="background:${GRIS}"></i>Índice original del BCRA</div>`, true)}
+      ${bloqueGrafico('Índice de tipo de cambio real metalúrgico',
+        preset+' · '+T.titulo.toLowerCase(),
+        `<span id="claves"></span>`, true)}
       <div class="caja"><h2>Con qué países se compara el peso, y cuánto pesa cada uno</h2>
         <div class="cuerpo">
           <div class="barra" id="barra"></div>
@@ -472,15 +633,23 @@ function vistaSector(){
         </div></div>
       <div class="caja"><h2>Qué se está midiendo</h2>
         <div class="cuerpo"><div id="presets">${out.join('')}</div></div></div>
+      <div class="caja"><h2>Comparar con</h2>
+        <div class="cuerpo">
+          <div class="paises" id="comparar" style="max-height:210px"></div>
+          <p style="font-family:var(--sub);font-size:11.5px;color:var(--gris-claro);
+            margin-top:9px;line-height:1.45">Hasta ${MAX_COMP} series de referencia. Las cifras
+            de arriba siguen describiendo la serie principal.</p>
+        </div></div>
     </aside>
   </div>
-  <p class="pie">Base 17 de diciembre de 2015 = 100. Cobertura del comercio del sector:
-    <span id="cobTxt"></span>.</p>`;
+  <p class="pie">Cuanto más arriba está la línea, más depreciado el tipo de cambio real.
+    Cuanto más abajo, más apreciado. Pasá el mouse sobre cada opción para ver qué incluye.</p>`;
 }
 
 function vistaEmpresa(){
   const P=D.presets[lado];
-  const ops=Object.keys(P).map(k=>`<option value="${k}" ${k===comparar?'selected':''}>${k}</option>`).join('');
+  const ops=Object.entries(P).filter(([,v])=>v.tipo!=='familia')
+    .map(([k])=>`<option value="${k}" ${k===comparar?'selected':''}>${k}</option>`).join('');
   return `
   <div class="lado" role="group">
     <button id="bImpo" aria-pressed="${lado==='IMPO'}"><strong>Mis compras al exterior</strong>
@@ -491,12 +660,13 @@ function vistaEmpresa(){
   <div class="cifras" id="cifras"></div>
   <div class="grilla">
     <main>
-      ${bloqueGrafico('Tu índice frente al del sector',
-        'Cargá tus porcentajes a la derecha y elegí contra qué compararte.',
+      ${bloqueGrafico('Índice de tipo de cambio real metalúrgico',
+        'Tu canasta frente a '+comparar+' · '+TEXTO_LADO[lado].titulo.toLowerCase(),
         `<div><i style="background:${AZUL}"></i>Tu canasta</div>
          <div><i style="background:${AZUL2}"></i>${comparar}</div>`, false)}
       <div class="caja"><h2>Comparar contra</h2>
-        <div class="cuerpo"><select id="selComp">${ops}</select><div id="aviso"></div></div></div>
+        <div class="cuerpo"><select id="selComp">${ops}</select>
+          <div id="compo"></div><div id="aviso"></div></div></div>
     </main>
     <aside>
       <div class="caja"><h2>Tu canasta, en porcentajes</h2>
@@ -509,11 +679,54 @@ function vistaEmpresa(){
     </aside>
   </div>
   <p class="pie">No hace falta que los porcentajes sumen 100: la columna de la derecha muestra
-    la participación que efectivamente se usa. Solo aparecen los países que el índice cubre;
-    si comerciás con otros, esa parte no se puede representar.</p>`;
+    la participación que efectivamente se usa. Aparecen los principales países con los que
+    comercia el sector. Cuanto más arriba está la línea, más depreciado el tipo de cambio
+    real; cuanto más abajo, más apreciado.</p>`;
 }
 
 /* ================= piezas ================= */
+/* ---------- globo explicativo de cada serie ---------- */
+function textoGlobo(nombre){
+  const P=D.presets[lado][nombre]; if(!P) return '';
+  const top=G.map((g,i)=>[g,P.w[i]]).filter(x=>x[1]>0)
+    .sort((a,b)=>b[1]-a[1]).slice(0,3)
+    .map(([g,v])=>`${g} ${(v*100).toFixed(0)}%`).join(' · ');
+  const dir = lado==='IMPO' ? 'orígenes' : 'destinos';
+  let q='';
+  if(P.tipo==='total')
+    q='Todo el comercio metalúrgico del sector.';
+  else if(P.tipo==='familia')
+    q='Reúne los rubros de '+P.miembros.join(', ').toLowerCase()+
+      ', que comparten un perfil de '+(lado==='IMPO'?'origen':'destino')+' parecido.';
+  else
+    q='Rubro del universo metalúrgico.';
+  return `<b>${nombre}</b><br>${q}<span class="cc">Principales ${dir}: ${top}` +
+         `<br>Cubre el ${(P.cobertura*100).toFixed(1).replace('.',',')}% de este flujo.</span>`;
+}
+function ubicarGlobo(g,el){
+  const r=el.getBoundingClientRect();
+  let left=r.left-g.offsetWidth-12;
+  if(left<8) left=Math.min(r.right+12, innerWidth-g.offsetWidth-8);
+  g.style.left=Math.max(8,left)+'px';
+  g.style.top=Math.max(8,Math.min(r.top-8,innerHeight-g.offsetHeight-8))+'px';
+}
+
+function conectarGlobos(){
+  const g=document.getElementById('globo');
+  // globos de las cifras
+  document.querySelectorAll('.cifra[data-tip]').forEach(c=>{
+    c.onmouseenter=()=>{ g.innerHTML=c.dataset.tip; g.classList.add('ver'); ubicarGlobo(g,c); };
+    c.onmouseleave=()=>g.classList.remove('ver');
+  });
+  document.querySelectorAll('.opcion').forEach(b=>{
+    b.onmouseenter=e=>{
+      g.innerHTML=textoGlobo(b.dataset.p); g.classList.add('ver');
+      ubicarGlobo(g,b);
+    };
+    b.onmouseleave=()=>g.classList.remove('ver');
+  });
+}
+
 function pintarBarra(w){
   const b=$('#barra'); if(!b) return;
   const seg=w?G.map((g,i)=>[g,w[i]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]):[];
@@ -526,62 +739,218 @@ function pintarBarra(w){
 
 const ultimo=a=>{ if(!a) return null; for(let i=a.length-1;i>=0;i--) if(a[i]!=null) return a[i]; return null; };
 
+function etiquetaTramo(){
+  const M=ejeMensual();
+  if(!vista.fechas.length) return '';
+  const hastaElFinal = r1===M.length-1;
+  const meses=vista.meses;
+  if(!hastaElFinal) return 'el período '+etiquetaFecha(0)+' — '+etiquetaFecha(vista.fechas.length-1);
+  if(meses>=24) return 'los últimos '+Math.round(meses/12)+' años';
+  if(meses>=2)  return 'los últimos '+meses+' meses';
+  return 'el período visible';
+}
+
 function cifras(y,ref,etiqueta){
   const v=ultimo(y);
   if(v==null) return `<div class="cifra"><span class="k">${etiqueta}</span><span class="v">—</span>
     <span class="n">cargá tus porcentajes</span></div>`;
   const idx=[]; y.forEach((x,i)=>{ if(x!=null) idx.push(i); });
-  const atras=k=>{ const i=idx[idx.length-1-k]; return i==null?null:y[i]; };
-  const paso=granularidad==='diario'?21:1, anio=granularidad==='diario'?252:12;
-  const d=(a,b)=>(a==null||b==null)?null:(a/b-1)*100;
-  const vm=d(v,atras(paso)), va=d(v,atras(anio));
+  const iUlt=idx[idx.length-1];
+  const iAnt=haceUnAnio(iUlt);
+  const ant=iAnt==null?null:y[iAnt];
+  const va=ant==null?null:(v/ant-1)*100;
   const cls=x=>x==null?'':(x>0?'pos':'neg');
   const sg=x=>x==null?'—':(x>0?'+':'')+x.toFixed(1).replace('.',',')+'%';
+
+  // Promedio y posicion se calculan sobre el TRAMO VISIBLE, asi acompanian
+  // al selector de periodo en lugar de quedar fijos.
+  const val=y.filter(x=>x!=null);
+  let prom=null,dist=null,pordebajo=null,mn=null,mx=null;
+  if(val.length>3){
+    prom=val.reduce((a,b)=>a+b,0)/val.length;
+    dist=(v/prom-1)*100;
+    pordebajo=val.filter(x=>x<v).length;
+    mn=Math.min(...val); mx=Math.max(...val);
+  }
+  const tramoTxt=etiquetaTramo();
+  const unidad=vista.gran==='diario'?'días':'meses';
+  const pos=(mx!=null&&mx>mn)?((v-mn)/(mx-mn)*100):50;
+
+  const tipProm=`Compara el valor de hoy contra el promedio de ${tramoTxt}. `+
+    `El promedio se recalcula cada vez que cambiás el período, así que no es un valor fijo.`;
+  const tipPos=`Ordena los ${val.length} ${unidad} de ${tramoTxt} de menor a mayor y ubica `+
+    `el valor de hoy en esa fila. Mínimo del período ${fmt(mn)}, mediana ${fmt(mediana(val))}, `+
+    `máximo ${fmt(mx)}.`;
+  const tipIA=iAnt==null?'Sin dato de un año atrás dentro del período elegido.'
+    :`Compara el valor de hoy con el de ${etiquetaFecha(iAnt)}, doce meses antes.`;
+
   let h=`<div class="cifra"><span class="k">${etiqueta}</span><span class="v">${fmt(v)}</span>
-      <span class="n">base dic-2015 = 100</span></div>
-    <div class="cifra"><span class="k">Variación mensual</span>
-      <span class="v ${cls(vm)}" style="font-size:26px">${sg(vm)}</span></div>
-    <div class="cifra"><span class="k">Variación interanual</span>
-      <span class="v ${cls(va)}" style="font-size:26px">${sg(va)}</span></div>`;
+      <span class="n">al ${etiquetaFecha(iUlt)}</span></div>
+
+    <div class="cifra" data-tip="${tipProm.replace(/"/g,'&quot;')}">
+      <span class="k">Frente al promedio del período</span>
+      <span class="v ${cls(dist)}" style="font-size:26px">${sg(dist)}</span>
+      <span class="n">promedio de ${tramoTxt}: ${fmt(prom)}</span></div>
+
+    <div class="cifra" data-tip="${tipPos.replace(/"/g,'&quot;')}">
+      <span class="k">Posición en el período</span>
+      <span class="v" style="font-size:26px">${pordebajo==null?'—':pordebajo+' de '+val.length}</span>
+      <span class="n">${unidad} estuvieron por debajo del nivel actual</span>
+      ${mn==null?'':`<div class="rangoviz"><div class="p" style="left:${pos.toFixed(1)}%"></div></div>
+      <div class="ext"><span>mín ${fmt(mn)}</span><span>máx ${fmt(mx)}</span></div>`}</div>
+
+    <div class="cifra" data-tip="${tipIA.replace(/"/g,'&quot;')}">
+      <span class="k">Variación interanual</span>
+      <span class="v ${cls(va)}" style="font-size:26px">${sg(va)}</span>
+      <span class="n">${iAnt==null?'sin dato de un año atrás':'contra '+etiquetaFecha(iAnt)}</span></div>`;
+
   if(ref!=null){
-    const g=(v/ref-1)*100;
-    h+=`<div class="cifra"><span class="k">Frente al sector</span>
+    const g=((ref.propio!=null?ref.propio:v)/ref.valor-1)*100;
+    h+=`<div class="cifra" data-tip="Diferencia de nivel entre tu índice y el del sector, medida
+      siempre en la última fecha con dato, sin importar el período que estés mirando.">
+      <span class="k">Frente al sector</span>
       <span class="v ${cls(g)}" style="font-size:26px">${sg(g)}</span>
-      <span class="n">sector: ${fmt(ref)}</span></div>`;
+      <span class="n">al dato más reciente (${ref.fecha}): ${fmt(ref.valor)}</span></div>`;
   }
   return h;
 }
 
+function mediana(a){
+  const s=[...a].sort((x,y)=>x-y), n=s.length;
+  return n%2? s[(n-1)/2] : (s[n/2-1]+s[n/2])/2;
+}
+
+function etiquetaFecha(i){
+  // se indexa sobre el eje YA RECORTADO, que es el que corresponde a la serie
+  // que recibe cifras(); usar el eje completo desalinea las fechas
+  const f=fechas[i]; if(!f) return '';
+  const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const [a,m,d]=f.split('-');
+  return vista.gran==='diario' ? `${+d} ${MES[+m-1]} ${a}` : `${MES[+m-1]} ${a}`;
+}
+
 function sincronizarSlider(){
-  const f=ejeFechas(), s0=$('#s0'), s1=$('#s1'); if(!s0) return;
+  const f=ejeMensual(), s0=$('#s0'), s1=$('#s1'); if(!s0) return;
   s0.max=s1.max=f.length-1; s0.value=r0; s1.value=r1;
   const a=r0/(f.length-1)*100, b=r1/(f.length-1)*100;
   $('#act').style.left=a+'%'; $('#act').style.width=(b-a)+'%';
-  const et=x=>f[x].slice(0,7).replace('-','/');
+  const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const et=x=>{ const [y,m]=f[x].split('-'); return MES[+m-1]+' '+y; };
   $('#rangoTxt').textContent=et(r0)+' — '+et(r1);
   document.querySelectorAll('.atajos [data-a]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.a===atajo));
-  document.querySelectorAll('.atajos [data-g]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===granularidad));
+  const g=$('#granTxt');
+  if(g) g.textContent = vista.gran==='diario'
+      ? 'Se muestra el dato de cada día'
+      : (vista.meses<=MESES_DIARIO
+         ? 'Se muestra el promedio de cada mes: no hay dato diario tan atrás'
+         : 'Se muestra el promedio de cada mes');
 }
 
 /* ================= render ================= */
-function render(foco){
+
+// Se separa en dos: render() rehace el HTML y vuelve a enganchar los eventos;
+// actualizar() solo recalcula la serie, las cifras y el grafico. El slider
+// llama a actualizar(), porque rehacer el HTML en medio de un arrastre
+// destruye el control que se esta arrastrando y lo deja trabado.
+function actualizar(){
+  // la granularidad y el tramo se resuelven primero: todo lo demas depende
+  vista=tramo(); fechas=vista.fechas;
+
+  lineas=[];
+  if(modo==='sector'){
+    const T=TEXTO_LADO[lado];
+    const rec=recorte(serieSector());
+    if(verBCRA) lineas.push({y:recorte(set().itcrm),c:GRIS,w:1.6,d:[5,4],et:'Índice del BCRA'});
+    // las de referencia van primero para que la principal quede arriba
+    [...comparaciones].slice(0,MAX_COMP).forEach((n,k)=>{
+      const s=recorte(serie(null,nombreSerie(lado,n)));
+      if(s) lineas.push({y:s,c:COMP[k%COMP.length],w:1.8,et:n});
+    });
+    lineas.push({y:rec,c:AZUL,w:2.4,et:preset});
+    $('#cifras').innerHTML=cifras(rec,null,'Índice');
+    const cl=$('#claves');
+    if(cl) cl.innerHTML=lineas.slice().reverse().map(l=>
+      `<div><i style="background:${l.c}"></i>${l.et}</div>`).join('')
+      + `<div style="color:var(--gris-claro)">${TEXTO_LADO[lado].titulo.toLowerCase()}</div>`;
+  } else {
+    const w=norm(canasta);
+    const full=serie(w,null);
+    const sec=serie(null,nombreSerie(lado,comparar));
+    const ry=recorte(full), rc=recorte(sec);
+    lineas.push({y:rc,c:AZUL2,w:2,et:comparar});
+    lineas.push({y:ry,c:AZUL,w:2.4,et:'Tu canasta'});
+    // la comparacion se hace SIEMPRE contra el ultimo dato disponible, no
+    // contra el final del tramo que se este mirando
+    let refSec=null;
+    if(w){
+      const ejeF=set().fechas;
+      let iu=-1; for(let k=(sec||[]).length-1;k>=0;k--) if(sec[k]!=null){iu=k;break;}
+      let iy=-1; for(let k=(full||[]).length-1;k>=0;k--) if(full[k]!=null){iy=k;break;}
+      if(iu>=0&&iy>=0){
+        const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+        const [a,m,d]=ejeF[iu].split('-');
+        refSec={valor:sec[iu],
+                fecha:vista.gran==='diario'?`${+d} ${MES[+m-1]} ${a}`:`${MES[+m-1]} ${a}`,
+                propio:full[iy]};
+      }
+    }
+    $('#cifras').innerHTML=cifras(ry, refSec, 'Tu índice');
+  }
+  if(modo==='empresa') refrescarCanasta(); else refrescarPaises();
+  sincronizarSlider();
+  dibujar();
+  // las cifras se reescriben en cada actualizacion, asi que los globos hay que
+  // volver a engancharlos aca y no solo en render()
+  conectarGlobos();
+}
+
+// Actualiza la columna de porcentajes y el total SIN reescribir los <input>.
+// Reescribirlos en cada tecla era lo que rompia la carga: el navegador perdia
+// el cursor y no dejaba tipear el segundo digito.
+// Actualiza los porcentajes y el aviso de la lista de paises sin reescribirla,
+// para no perder la posicion del scroll al tildar o destildar.
+function refrescarPaises(){
+  const w=pesosSector(), P=D.presets[lado][preset];
+  const orden=G.map((g,i)=>[g,P.w[i],i]).sort((a,b)=>b[1]-a[1]);
+  document.querySelectorAll('#paises .pais').forEach((fila,k)=>{
+    const [g,,i]=orden[k]||[]; if(g==null) return;
+    const off=apagados.has(g);
+    fila.classList.toggle('off',off);
+    const sp=fila.querySelector('.w');
+    if(sp) sp.textContent = off? '—' : ((w?w[i]:0)*100).toFixed(1)+'%';
+  });
+  const cob=D.presets[lado][preset].cobertura, a=$('#aviso');
+  if(a){
+    let av='';
+    if(cob<0.70) av=`<div class="nota"><b>Cobertura ${(cob*100).toFixed(1)}%.</b>
+      Los países disponibles explican menos del 70% de este flujo, así que el dato es indicativo.</div>`;
+    else if(apagados.size) av=`<div class="nota"><b>Canasta modificada.</b>
+      Sacaste ${apagados.size} ${apagados.size>1?'países':'país'}. El resultado responde a qué
+      competitividad habría si el sector comerciara solo con los que quedaron, y ya no es el
+      índice del sector.</div>`;
+    a.innerHTML=av;
+  }
+  pintarBarra(w);
+}
+
+function refrescarCanasta(){
+  const w=norm(canasta);
+  document.querySelectorAll('#canastaLista .fila').forEach((fila,i)=>{
+    const g=G[i];
+    fila.classList.toggle('cero',!(canasta[g]>0));
+    const pc=fila.querySelector('.pc');
+    if(pc) pc.textContent = (w&&w[i]>0)? (w[i]*100).toFixed(0)+'%' : '—';
+  });
+  const s=$('#suma'); if(s) s.textContent=G.reduce((a,g)=>a+(+canasta[g]||0),0).toFixed(0);
+}
+
+function render(){
   $('#mSector').setAttribute('aria-pressed',modo==='sector');
   $('#mEmpresa').setAttribute('aria-pressed',modo==='empresa');
   $('#vista').innerHTML = modo==='sector'? vistaSector() : vistaEmpresa();
 
-  const f=ejeFechas();
-  if(r0==null||r1==null||r1>f.length-1) aplicarAtajo(atajo||'10a');
-
-  lineas=[];
   if(modo==='sector'){
-    const rec=recorte(serieSector()); fechas=rec.f;
-    if(verBCRA){ const b=recorte(set().itcrm); lineas.push({y:b.y,c:GRIS,w:1.6,d:[5,4]}); }
-    lineas.push({y:rec.y,c:AZUL,w:2.4});
-    $('#cifras').innerHTML=cifras(rec.y,null,'Índice');
-    pintarBarra(pesosSector());
-
     const cob=D.presets[lado][preset].cobertura;
-    $('#cobTxt').textContent=(cob*100).toFixed(1)+'%';
     let av='';
     if(cob<0.70) av=`<div class="nota"><b>Cobertura ${(cob*100).toFixed(1)}%.</b>
       Los países disponibles explican menos del 70% de este flujo, así que el dato es indicativo.</div>`;
@@ -598,20 +967,37 @@ function render(foco){
       return `<label class="pais ${off?'off':''}"><input type="checkbox" data-g="${g}" ${off?'':'checked'}>
         <span class="n">${g}</span><span class="w">${off?'—':((w?w[i]:0)*100).toFixed(1)+'%'}</span></label>`;
     }).join('');
+    // no se reescribe la lista al tildar: eso perdia la posicion del scroll
     $('#paises').querySelectorAll('input').forEach(c=>c.onchange=()=>{
-      c.checked?apagados.delete(c.dataset.g):apagados.add(c.dataset.g); render(); });
-    $('#presets').querySelectorAll('.opcion').forEach(b=>b.onclick=()=>{preset=b.dataset.p;render();});
+      c.checked?apagados.delete(c.dataset.g):apagados.add(c.dataset.g);
+      actualizar(); });
+    $('#presets').querySelectorAll('.opcion').forEach(b=>b.onclick=()=>{
+      preset=b.dataset.p; comparaciones.delete(preset); render(); });
+
+    // lista de series de referencia, sin la principal
+    const cmp=$('#comparar');
+    if(cmp){
+      const lleno=comparaciones.size>=MAX_COMP;
+      cmp.innerHTML=Object.keys(D.presets[lado]).filter(k=>k!==preset)
+        .filter(k=>D.presets[lado][k].tipo!=='familia')
+        .map(k=>{
+          const on=comparaciones.has(k), col=on?COMP[[...comparaciones].indexOf(k)%COMP.length]:null;
+          return `<label class="pais ${on?'':'off'}" ${(!on&&lleno)?'style="opacity:.45"':''}>
+            <input type="checkbox" data-c="${k}" ${on?'checked':''} ${(!on&&lleno)?'disabled':''}>
+            <span class="n">${k}</span>
+            <span class="w">${on?`<i style="display:inline-block;width:14px;height:3px;
+              border-radius:2px;background:${col}"></i>`:''}</span></label>`;
+        }).join('');
+      cmp.querySelectorAll('input').forEach(c=>c.onchange=()=>{
+        c.checked? comparaciones.add(c.dataset.c) : comparaciones.delete(c.dataset.c);
+        render(); });
+    }
     $('#bTodos').onclick=()=>{apagados.clear();render();};
     $('#bNinguno').onclick=()=>{G.forEach(g=>apagados.add(g));render();};
-    const ch=$('#chkBCRA'); if(ch) ch.onchange=()=>{verBCRA=ch.checked;render();};
+    const ch=$('#chkBCRA'); if(ch) ch.onchange=()=>{verBCRA=ch.checked;actualizar();};
+    conectarGlobos();
   } else {
     const w=norm(canasta);
-    const ry=recorte(serie(w,null)); fechas=ry.f;
-    const rc=recorte(serie(null,nombreSerie(lado,comparar)));
-    lineas.push({y:rc.y,c:AZUL2,w:2});
-    lineas.push({y:ry.y,c:AZUL,w:2.4});
-    $('#cifras').innerHTML=cifras(ry.y, w?ultimo(rc.y):null, 'Tu índice');
-
     $('#canastaLista').innerHTML=G.map((g,i)=>{
       const v=canasta[g]||0;
       return `<div class="fila ${v>0?'':'cero'}"><span class="n">${g}</span>
@@ -620,31 +1006,45 @@ function render(foco){
     }).join('');
     $('#suma').textContent=G.reduce((a,g)=>a+(+canasta[g]||0),0).toFixed(0);
     $('#canastaLista').querySelectorAll('input').forEach(inp=>inp.oninput=()=>{
-      canasta[inp.dataset.g]=Math.max(0,+inp.value||0); render(inp.dataset.g); });
+      canasta[inp.dataset.g]=Math.max(0,+inp.value||0); actualizar(); });
     $('#selComp').onchange=e=>{comparar=e.target.value;render();};
+    const Pc=D.presets[lado][comparar];
+    const topc=G.map((g,i)=>[g,Pc.w[i]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(([g,x])=>`${g} ${(x*100).toFixed(0)}%`).join(' · ');
+    $('#compo').innerHTML=`<p style="font-family:var(--sub);font-size:12.5px;
+      color:var(--gris);margin-top:9px;line-height:1.5">
+      <b style="color:var(--tinta)">${comparar}</b> es una canasta compuesta principalmente por
+      ${topc}.</p>`;
     $('#bProm').onclick=()=>{const b=D.presets[lado]['Total del intercambio'].w;
       G.forEach((g,i)=>canasta[g]=Math.round(b[i]*1000)/10); render();};
     $('#bBorrar').onclick=()=>{G.forEach(g=>canasta[g]=0); render();};
-    $('#aviso').innerHTML=`<div class="nota info">Tu canasta se compara contra <b>${comparar}</b>.
-      Por encima significa que tu combinación de países te dejó mejor parado que al promedio;
-      por debajo, peor.</div>`;
+    $('#aviso').innerHTML=`<div class="nota info"><b>Frente al sector</b> es la diferencia
+      porcentual entre el nivel de tu índice y el de <b>${comparar}</b> en la fecha más
+      reciente. Un +5% significa que hoy tu canasta está 5% más depreciada que la del sector,
+      o sea que el tipo de cambio real te resulta más favorable. Un valor negativo indica lo
+      contrario. No mide rentabilidad ni márgenes.</div>`;
   }
 
-  $('#bImpo').onclick=()=>{lado='IMPO';preset='Total del intercambio';comparar='Total del intercambio';apagados.clear();render();};
-  $('#bExpo').onclick=()=>{lado='EXPO';preset='Total del intercambio';comparar='Total del intercambio';apagados.clear();render();};
-  document.querySelectorAll('.atajos [data-a]').forEach(b=>b.onclick=()=>{aplicarAtajo(b.dataset.a);render();});
-  document.querySelectorAll('.atajos [data-g]').forEach(b=>b.onclick=()=>{
-    granularidad=b.dataset.g; aplicarAtajo(atajo||'10a'); render(); });
+  const cambiarLado=l=>{ lado=l; preset='Total del intercambio'; comparar='Total del intercambio';
+    apagados.clear(); comparaciones.clear(); render(); };
+  $('#bImpo').onclick=()=>cambiarLado('IMPO');
+  $('#bExpo').onclick=()=>cambiarLado('EXPO');
+  document.querySelectorAll('.atajos [data-a]').forEach(b=>b.onclick=()=>{aplicarAtajo(b.dataset.a);actualizar();});
+  conectarGlobos();
+
   const s0=$('#s0'), s1=$('#s1');
   if(s0){
-    s0.oninput=()=>{ r0=Math.min(+s0.value,r1-1); atajo=''; render(); };
-    s1.oninput=()=>{ r1=Math.max(+s1.value,r0+1); atajo=''; render(); };
+    s0.oninput=()=>{ r0=Math.min(+s0.value,r1-1); atajo=''; actualizar(); };
+    s1.oninput=()=>{ r1=Math.max(+s1.value,r0+1); atajo=''; actualizar(); };
   }
-  sincronizarSlider();
-  dibujar();
 
-  if(foco){ const el=$(`input[data-g="${CSS.escape(foco)}"]`);
-    if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length); } }
+  const cv=document.getElementById('lienzo');
+  if(cv){
+    cv.onmousemove=mostrarTip;
+    cv.onmouseleave=ocultarTip;
+  }
+
+  actualizar();
 }
 
 $('#mSector').onclick=()=>{modo='sector';render();};
