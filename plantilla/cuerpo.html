@@ -546,8 +546,13 @@ function mostrarTip(ev){
   const v=princ.y?princ.y[i]:null;
   if(v==null){ ocultarTip(); return; }
 
-  const et=fechas[i].length>7 ? fechas[i].split('-').reverse().join('/')
-                              : fechas[i].slice(0,7).replace('-','/');
+  // en vista mensual la fecha es fin de mes (ej. 2026-09-30) y no un dato real
+  // de ese dia, asi que se muestra solo mes y año para no sugerir precision diaria
+  const MESL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
+             'septiembre','octubre','noviembre','diciembre'];
+  const [ay,am,ad]=fechas[i].split('-');
+  const et = vista.gran==='diario' ? `${+ad} de ${MESL[+am-1]} de ${ay}`
+                                    : `${MESL[+am-1]} de ${ay}`;
   let h=`<div class="f">${et}</div>`;
   lineas.slice().reverse().forEach(l=>{
     const x=l.y?l.y[i]:null; if(x==null) return;
