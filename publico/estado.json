@@ -1,9 +1,9 @@
 {
-  "actualizado":"2026-09-30 16:36",
-  "ultimo_dato":"2026-09-29",
+  "actualizado":"2026-10-01 17:14",
+  "ultimo_dato":"2026-09-30",
   "series":24,
   "socios":28,
   "avisos":[
-
+    "la base de comercio de EXPO tiene 7 meses de atraso (ultimo: 2026-03); hay que reexportar desde Power BI"
   ]
 }
