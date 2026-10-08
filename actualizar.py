@@ -142,6 +142,10 @@ def paso_descargas() -> None:
     log("Cotizaciones de la API del BCRA (incremental)")
     import api_bcra
     api_bcra.bajar_socios()
+    try:
+        api_bcra.bajar_dolar()
+    except Exception as e:
+        alerta(f"no se pudo actualizar la cotizacion nominal del BCRA: {e}")
 
 
 def procesar_bis() -> None:
@@ -236,6 +240,17 @@ def paso_validar(bil: pd.DataFrame, diario: pd.DataFrame) -> None:
         if salto > 15:
             alerta(f"{col}: salto diario de {salto:.1f}% en el ultimo ano")
     log("saltos diarios revisados")
+
+    # La cotización sólo alimenta el dólar equivalente, nunca el índice.
+    dolar = DATOS / "api_bcra" / "ARS_por_USD.csv"
+    if dolar.exists():
+        s = pd.read_csv(dolar, index_col=0, parse_dates=True).iloc[:, 0].dropna()
+        if s.empty:
+            alerta("cotizacion nominal vacia; equivalencia no disponible")
+        elif (pd.Timestamp.today().normalize() - s.index.max()).days > DIAS_MAX_ATRASO:
+            alerta(f"cotizacion nominal atrasada (ultimo: {s.index.max().date()})")
+    else:
+        alerta("sin cotizacion nominal del BCRA; equivalencia no disponible")
 
     # 5. antiguedad de la base de comercio
     from tcrm_v3 import leer_base

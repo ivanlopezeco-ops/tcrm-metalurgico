@@ -1,0 +1,6 @@
+__pycache__/
+.venv/
+salida/
+datos/ITCRMSerie.xlsx
+node_modules/
+test-results/

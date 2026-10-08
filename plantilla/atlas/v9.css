@@ -1,0 +1,234 @@
+/* V9: dos KPI, serie central y canasta a la derecha. */
+:root{--canasta-otra:#387a8b}
+:root[data-theme=dark]{--canasta-otra:#8ddac6}
+.ambas-canastas[aria-pressed=true]{background:var(--seleccion);color:var(--azul);border-color:var(--azul);font-weight:600}
+.alcance-canastas{font-size:11px;line-height:1.5;color:var(--eje);margin:3px 0 5px}
+.chart-column .claves{flex-wrap:wrap;gap:5px 12px}
+.tip .otra-canasta-tip{line-height:1.5}
+.tip .l span{min-width:0;white-space:normal}
+.tip .l b{flex-shrink:0}
+#app{max-width:1680px;padding:12px 24px 14px}
+body:before,:root[data-theme=dark] body:before{height:82px}
+.cab.compacta{grid-template-columns:auto minmax(260px,1fr) auto auto;gap:20px;padding:0 0 12px;min-height:60px}
+.cab.compacta .logos{grid-column:1;grid-row:1}
+.cab.compacta .t{grid-column:2;grid-row:1}
+.cab.compacta .modos{grid-column:3;grid-row:1;gap:14px}
+.cab.compacta .theme{grid-column:4;grid-row:1}
+.cab.compacta h1{font-size:clamp(20px,1.8vw,27px)}
+.cab.compacta .modos button{min-height:40px;font-size:12px;padding:8px 0;color:#e3eff8;border-bottom:2px solid transparent}
+.cab.compacta .modos button[aria-pressed=true]{border-color:#7ccaff;background:transparent!important;color:white}
+.cab.compacta .modos .selection-marker{display:none}
+.cab.compacta p.sello{font-size:11px}
+.barra-controles{padding:8px 18px}
+.barra-controles .scope{width:100%;gap:24px}
+.barra-controles .scope-field{order:-1;flex-direction:row;align-items:center}
+.barra-controles .scope-field select{flex:1}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 300px;align-items:stretch}
+#resumenPrincipal{grid-column:1 / -1;grid-row:1;display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:0;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--regla)}
+#resumenPrincipal>h2,#resumenPrincipal>.fecha-actual{display:none}
+#resumenPrincipal .principal{padding:0 22px 0 0;border:0}
+#resumenPrincipal .principal+.principal{border-left:1px solid var(--regla);padding-left:24px}
+#resumenPrincipal .principal .k{font-size:12px;margin:0 0 5px;min-height:0}
+#resumenPrincipal .principal .v{font-size:32px;line-height:1.05}
+#resumenPrincipal .principal .n{font-size:11px;margin-top:5px}
+.resumen-guia{border-left:1px solid var(--regla);padding-left:24px;align-self:center;font-size:12px;line-height:1.5;display:flex;flex-direction:column;align-items:flex-start}
+.resumen-guia strong{font-weight:600;color:var(--titulo)}
+.resumen-guia span{color:var(--eje)}
+#abrirPromedio{font-size:12px;color:var(--azul);background:none;border:0;border-bottom:1px solid var(--azul);padding:2px 0;min-height:28px;margin-top:3px;cursor:pointer}
+.chart-column{grid-column:1;grid-row:2;padding:14px 20px 10px;min-width:0}
+.chart-column .gcab{padding:0 0 5px;gap:6px 12px;align-items:center}
+.chart-column .gcab h2{font-size:16px}
+.chart-column .gcab #granTxt{font-size:11px;margin-left:0}
+.comparacion-controles{flex-basis:auto;margin-left:auto;font-size:11px;gap:5px}
+.comparacion-opciones button{font-size:11px;min-height:36px;padding:6px 9px}
+.indice-actual{font-size:11px;margin:2px 0 6px}
+.comparacion-actual{padding:4px 0;margin:0 0 6px;min-height:0}
+.comparacion-resultado strong{font-size:18px}
+.comparacion-fecha{font-size:11px;margin-left:auto}
+.chart-column canvas{height:clamp(230px,calc(100svh - 520px),390px)}
+.chart-column .claves{padding:4px 0;font-size:11px;min-height:30px}
+.comparabtn{min-height:30px;font-size:11px;padding:3px 8px}
+.guia-grafico{font-size:11px;padding:0;line-height:1.5}
+.guia-grafico button{font-size:11px}
+.chart-column .periodo{border-top:1px solid var(--regla);border-bottom:0;padding:6px 0 0;margin-top:5px}
+.chart-column .periodo .slider{height:22px}
+.chart-column .atajos button{min-height:32px;padding:5px 9px;font-size:11px}
+.chart-column .pfila{gap:8px}
+.chart-column .pfila .rango{font-size:11px}
+.soporte-grafico{display:flex;gap:12px 24px;align-items:flex-start;flex-wrap:wrap;border-top:1px solid var(--regla);margin-top:8px;padding-top:5px}
+.soporte-grafico>details{flex:1;min-width:230px}
+.soporte-grafico summary{font-size:12px;cursor:pointer;min-height:30px;align-content:center}
+.chart-column .ayuda-lectura{margin:0;padding:0;border:0}
+.consulta-equivalencia>.columna-equivalencia{border:0;margin-top:8px;background:var(--context-panel)}
+.consulta-equivalencia #cajaDolar{padding:16px}
+.consulta-equivalencia #dolar .dol-b .v{font-size:30px}
+.consulta-equivalencia .ref-opciones{min-width:0}
+.stage>.basket{grid-column:2;grid-row:2;min-width:0;border:0;border-left:1px solid var(--regla);background:var(--context-panel);padding:14px 16px 10px}
+.stage>.basket>summary{font-size:15px;line-height:1.4;padding:0;min-height:0;pointer-events:none}
+.stage>.basket>summary span{display:none}
+.stage>.basket .caja>h2{font-size:12px;font-weight:500;padding:8px 0;color:var(--eje)}
+.stage>.basket .basket-body{padding:0;background:transparent;border:0}
+.stage>.basket .pais{font-size:12px;min-height:34px;padding:5px 0;row-gap:2px}
+.stage>.basket .pais .w{font-size:12px}
+.stage>.basket .paises,.stage>.basket .paises.scroll,.stage>.basket .canasta{max-height:clamp(180px,calc(100svh - 530px),300px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.stage>.basket .acciones{gap:6px;margin:4px 0 0;padding:0}
+.stage>.basket .acciones button{min-height:32px;font-size:11px;padding:4px 6px}
+.stage>.basket .vertodos{min-height:32px;font-size:11px;padding:6px 0}
+.stage>.basket .detalle{font-size:11px;line-height:1.5;padding-top:8px;margin-top:8px}
+.stage>.basket .compo-txt{font-size:11px;line-height:1.4;margin:5px 0}
+.stage>.basket .fila{padding:4px 0}
+.stage>.basket .fila input{min-height:36px}
+.tip,.tip.con-bcra{width:300px;min-width:0;max-width:calc(100% - 8px);font-size:12px;line-height:1.4;padding:12px;border:1px solid var(--regla);box-shadow:var(--shadow-tip)}
+.tip .f{font-size:12px;font-weight:600}
+.tip .l{line-height:1.6}
+.tip .equivalente-tip{border-top:1px solid var(--regla);margin-top:7px;padding-top:7px}
+.equivalente-tip b{font-size:19px;color:var(--azul);font-family:var(--figuras)}
+.tip-supuestos{font-size:11px;line-height:1.45;color:var(--eje);margin:6px 0 0}
+.tip.fijado{pointer-events:auto}
+.cerrar-lectura{font-size:12px;min-height:32px;margin-top:8px;background:var(--seleccion);color:var(--azul);border:0;padding:5px 10px;cursor:pointer}
+.ayuda-lectura .pie{font-size:12px;margin-top:10px;padding-top:10px}
+.view-note{font-size:11px;margin-top:6px;color:var(--eje)}
+@media(min-width:901px){
+ .chart-column .periodo{display:grid;grid-template-columns:auto minmax(80px,1fr) auto;align-items:center;gap:12px}
+ .chart-column .periodo .pfila{display:contents}
+ .chart-column .periodo .atajos{grid-column:1;grid-row:1}
+ .chart-column .periodo .slider{grid-column:2;grid-row:1;margin:0}
+ .chart-column .periodo .rango{grid-column:3;grid-row:1}
+}
+@media(min-width:1500px){.stage{grid-template-columns:minmax(0,1fr) 320px}.chart-column canvas{height:clamp(250px,calc(100svh - 520px),430px)}}
+@media(min-width:901px) and (max-width:1200px){
+ .cab.compacta{grid-template-columns:auto 1fr auto;gap:14px}
+ .cab.compacta .modos{grid-column:2;grid-row:2}
+ .cab.compacta .theme{grid-column:3;grid-row:1 / 3}
+ .cab.compacta .logos{grid-row:1 / 3}
+ .stage{grid-template-columns:minmax(0,1fr) 270px}
+ .comparacion-controles{flex-basis:100%;margin-left:0}
+ .columna-equivalencia{grid-column:auto}
+}
+@media(max-width:900px){
+ #app{padding:12px}
+ .cab.compacta{grid-template-columns:1fr auto;gap:10px}
+ .cab.compacta .logos{grid-column:1;grid-row:1}
+ .cab.compacta .theme{grid-column:2;grid-row:1}
+ .cab.compacta .t{grid-column:1 / -1;grid-row:2}
+ .cab.compacta .modos{grid-column:1 / -1;grid-row:3}
+ body:before,:root[data-theme=dark] body:before{height:190px}
+ .stage{grid-template-columns:1fr}
+ #resumenPrincipal{grid-template-columns:1fr 1fr;padding:14px}
+ #resumenPrincipal .principal{padding-right:10px}
+ #resumenPrincipal .principal+.principal{padding-left:14px}
+ #resumenPrincipal .principal .v{font-size:30px}
+ #resumenPrincipal .principal .k{min-height:36px}
+ .resumen-guia{grid-column:1 / -1;border-left:0;border-top:1px solid var(--regla);margin-top:12px;padding:10px 0 0}
+ .resumen-guia span{display:none}
+ .chart-column{grid-column:1;grid-row:2;padding:14px}
+ .chart-column canvas{height:310px}
+ .comparacion-controles{flex-basis:100%;margin-left:0;display:flex;flex-wrap:wrap}
+ .comparacion-opciones{margin-top:0}
+ .comparacion-opciones button{min-height:44px;font-size:12px}
+ .chart-column .atajos button{min-height:44px}
+ .stage>.basket{grid-column:1;grid-row:3;border-left:0;border-top:1px solid var(--regla);padding:0}
+ .stage>.basket>summary{pointer-events:auto;padding:14px;min-height:48px;font-size:14px}
+ .stage>.basket>summary span{display:inline}
+ .stage>.basket .basket-body{padding:0 14px 14px}
+ .stage>.basket .pais{min-height:44px}
+ .stage>.basket .paises,.stage>.basket .canasta{max-height:264px}
+ .stage>.basket .acciones button,.stage>.basket .vertodos,.cerrar-lectura{min-height:44px}
+ .barra-controles .scope-field{flex-wrap:wrap}
+ .barra-controles .scope-field label{flex-basis:100%}
+ .soporte-grafico{gap:4px}
+ .soporte-grafico>details{flex-basis:100%}
+}
+/* Rubros y leyenda: lectura de composición sin alterar la canasta activa. */
+.rubro-explorador{position:relative;flex:1;min-width:0}
+.rubro-explorador select{width:100%}
+.rubros-preview{position:absolute;left:0;right:0;top:100%;z-index:40;background:var(--panel,#fff);border:1px solid var(--regla);max-height:360px;overflow:auto;box-shadow:0 8px 20px #0002;padding:6px}
+.rubro-preview{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--regla);background:transparent;color:var(--cuerpo);padding:10px 12px;cursor:pointer}
+.rubro-preview strong{display:block;font-size:13px}
+.rubro-preview span{display:block;font-size:12px;margin-top:4px;color:var(--eje)}
+.rubro-preview:hover,.rubro-preview:focus-visible{background:var(--seleccion);outline:2px solid var(--azul);outline-offset:-2px}
+#claves{display:flex;flex-wrap:wrap;gap:9px 18px;padding:4px 0;flex:1 1 auto}
+#claves .l{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--cuerpo);line-height:1.5}
+#claves .l i{width:26px;min-width:26px;height:3px;border-radius:0}
+.otra-canasta-tip{padding:5px 0;border-bottom:1px solid var(--regla)}
+.tip .diferencia-canasta{font-size:11px;margin-top:3px}
+.tip{max-height:min(480px,75svh);overflow-y:auto}
+:root[data-theme=dark] .rubros-preview{background:#102130}
+@media(max-width:900px){.rubro-explorador{width:100%}.rubros-preview{max-height:310px}#claves{gap:8px 14px}}
+
+
+.tip:not(.ver){display:none}
+
+
+.comparacion-unificada{flex-wrap:wrap}.comparacion-unificada .comparacion-controles{flex-basis:100%;margin:0;justify-content:flex-start}.comparacion-unificada .comparacion-opciones{margin:0}.comparacion-unificada #etiquetaComparador{font-size:11px}
+
+.comparacion-propia{position:relative;font-size:12px}
+.comparacion-propia>summary{cursor:pointer;color:var(--azul);padding:8px 12px;border:1px solid var(--regla)}
+.opciones-propias{position:absolute;bottom:100%;right:0;width:380px;max-width:calc(100vw - 60px);max-height:340px;overflow:auto;background:var(--panel,#fff);border:1px solid var(--regla);box-shadow:0 8px 20px #0002;z-index:35;padding:8px}
+.opciones-propias>p{font-size:12px;color:var(--eje);padding:0 12px}
+.opciones-propias .comparacion-controles{display:block;margin:10px 0 0;padding:10px;border-top:1px solid var(--regla)}
+.rubro-preview[aria-pressed=true]{background:var(--seleccion)}
+.canasta-vacia{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:25px;text-align:center;color:var(--cuerpo)}
+.canasta-vacia[hidden]{display:none}
+.canasta-vacia strong{font-size:19px;color:var(--titulo)}
+.canasta-vacia p{max-width:360px;font-size:13px;line-height:1.6}
+/* Cierre: una zona de comparación y una fila por serie. */
+#bComparar,#comparaMenu,#quitarComparacionPropia{display:none!important}
+.panel-comparaciones{position:relative;font-size:12px;margin-left:auto}
+.panel-comparaciones>summary{cursor:pointer;color:var(--azul);padding:7px 10px;border:1px solid var(--regla);min-height:34px}
+.contenido-comparaciones{position:absolute;right:0;bottom:calc(100% + 6px);width:390px;max-width:calc(100vw - 52px);max-height:70svh;background:var(--panel,#fff);border:1px solid var(--regla);box-shadow:0 8px 20px #0002;z-index:45;display:flex;flex-direction:column;padding:10px}
+.referencias-fijas{flex-shrink:0;border-bottom:1px solid var(--regla);padding-bottom:10px}
+.referencias-fijas .comparacion-controles{display:block;margin:0}
+.referencias-fijas #etiquetaComparador{font-size:12px;display:block;margin-bottom:6px}
+.referencias-fijas .comparacion-opciones{display:flex;margin:0;gap:4px}
+.referencias-fijas .comparacion-opciones button{font-size:12px;min-height:36px;flex:1;padding:6px}
+.referencias-fijas #bAmbasCanastas{margin-top:8px;width:100%;min-height:34px;font-size:12px}
+.titulo-referencias{font-size:12px;color:var(--eje);margin:10px 4px 5px}
+.lista-referencias{overflow:auto;max-height:220px;min-height:0;overscroll-behavior:contain}
+.lista-referencias .rubro-preview{padding:8px;font-size:12px}
+.rubro-preview:disabled{opacity:.5;cursor:default}
+#claves{gap:6px 14px;min-width:0}
+#claves .l{gap:6px;max-width:100%}
+.quitar-referencia{background:transparent;color:var(--eje);border:0;text-decoration:underline;text-underline-offset:3px;font-size:11px;padding:4px;cursor:pointer}
+.quitar-referencia:hover{color:var(--azul)}
+.rubros-preview{right:auto;width:480px;max-width:100%;max-height:280px}
+.rubro-preview strong{font-size:13px}.rubro-preview span{font-size:12px}
+.chart-column .comparacion-actual,.chart-column #indiceActual,.chart-column .rango,.chart-column .atajos button,.chart-column #guiaGrafico,.alcance-canastas,.tip .f{font-size:12px}
+.tip{width:370px;max-width:calc(100% - 8px);padding:10px;max-height:min(520px,80svh)}
+.tip .tabla-tooltip{border-collapse:collapse;width:100%;font-size:12px;margin:8px 0}
+.tip .tabla-tooltip tr.l{display:table-row}
+.tip .tabla-tooltip th,.tip .tabla-tooltip td{padding:6px 4px;line-height:1.35;border-bottom:1px solid var(--regla);text-align:right;background:none;white-space:normal}
+.tip .tabla-tooltip th:first-child{text-align:left;font-weight:500;width:56%}
+.tip .tabla-tooltip thead th{font-size:11px;color:var(--eje)}
+.tip .tabla-tooltip td{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tip .tabla-tooltip .diferencia-bcra{border-top:0;font-size:inherit;margin:0}
+.tip .nota-diferencia{font-size:11px;color:var(--eje);line-height:1.4;margin:5px 0 8px}
+.tip .equivalente-tip{margin-top:8px;padding-top:8px}
+.tip .tip-supuestos{font-size:11px;line-height:1.4;margin:6px 0 0}
+.ayuda-pesos{font-size:12px;line-height:1.5;color:var(--eje);margin:0 0 10px}
+.cab-pesos{display:grid;grid-template-columns:1fr 68px 70px;gap:5px;font-size:11px;color:var(--eje);line-height:1.3;padding:0 0 6px;border-bottom:1px solid var(--regla)}
+.cab-pesos span:not(:first-child){text-align:right}
+.sin-pesos #resumenPrincipal,.sin-pesos .chart-column .periodo,.sin-pesos #consultaEquivalencia{display:none}
+.sin-pesos .chart-column canvas{height:180px}
+@media(max-width:900px){
+ .propia-cierre>.basket{grid-row:1}.propia-cierre>#resumenPrincipal{grid-row:2}.propia-cierre>.chart-column{grid-row:3}
+ .sin-pesos .chart-column canvas{height:130px}
+ .sin-pesos .canasta-vacia{padding:12px}.sin-pesos .canasta-vacia strong{font-size:17px}
+ .propia-cierre .basket .canasta{max-height:220px}
+ .panel-comparaciones{margin-left:0}.panel-comparaciones>summary{min-height:44px}
+ .contenido-comparaciones{left:0;right:auto;max-width:calc(100vw - 52px);max-height:68svh}
+ .referencias-fijas .comparacion-opciones button,.referencias-fijas #bAmbasCanastas{min-height:44px}
+ .quitar-referencia{min-height:44px;min-width:44px}
+ .tip .tabla-tooltip{font-size:11px}.tip .tabla-tooltip th,.tip .tabla-tooltip td{padding:5px 3px}
+ .tip .tabla-tooltip th:first-child{width:50%}
+}
+/* Ajustes de la inspección conjunta en escritorio y móvil. */
+.tip,.tip.con-bcra{width:370px}
+.tip .tabla-tooltip th,.tip .tabla-tooltip td{padding:4px}
+#claves .quitar-referencia{min-height:24px;line-height:1.3}
+@media(max-width:900px){
+ .panel-comparaciones{flex-basis:100%;width:100%;margin-left:0!important}
+ .panel-comparaciones>summary{width:fit-content}
+ .contenido-comparaciones{left:0;right:auto;width:100%;max-width:100%;box-sizing:border-box}
+ #claves .quitar-referencia{min-height:44px}
+}

@@ -222,6 +222,44 @@ def bajar(cod: str, desde: str = "1997-01-01", hasta: str | None = None,
     return nueva
 
 
+def bajar_dolar(desde: str = "1997-01-01", hasta: str | None = None,
+                usar_cache: bool = True) -> pd.Series:
+    """
+    PESOS POR DOLAR (tipoCotizacion del USD, cotizacion de referencia), diaria.
+
+    El resto del modulo usa el dolar solo como numerario para derivar cruces
+    y no lo guarda. Esta serie se conserva aparte porque el tablero traduce el
+    indice a un dolar equivalente. Se cachea en disco y se completa con los
+    dias nuevos, igual que las demas monedas; la tolerancia es de un dia
+    porque la cifra se presenta como "el dolar de hoy".
+    """
+    hasta = hasta or pd.Timestamp.today().date().isoformat()
+    CACHE.mkdir(parents=True, exist_ok=True)
+    destino = CACHE / "ARS_por_USD.csv"
+
+    previo = pd.Series(dtype=float)
+    if usar_cache and destino.exists():
+        previo = pd.read_csv(destino, index_col=0, parse_dates=True).iloc[:, 0]
+        if previo.size and previo.index.max() >= pd.Timestamp(hasta) - pd.Timedelta(days=1):
+            return previo
+        if previo.size:
+            desde = (previo.index.max() + pd.Timedelta(days=1)).date().isoformat()
+
+    trozos = []
+    for a in range(pd.Timestamp(desde).year, pd.Timestamp(hasta).year + 1):
+        d0 = max(pd.Timestamp(desde), pd.Timestamp(f"{a}-01-01")).date().isoformat()
+        d1 = min(pd.Timestamp(hasta), pd.Timestamp(f"{a}-12-31")).date().isoformat()
+        s = serie("USD", d0, d1)
+        if s.size:
+            trozos.append(s)
+        time.sleep(0.3)
+
+    nueva = pd.concat([previo] + trozos) if trozos else previo
+    nueva = nueva[~nueva.index.duplicated(keep="last")].sort_index()
+    nueva.to_csv(destino, header=["ARS_por_USD"])
+    return nueva
+
+
 def bajar_socios(socios: dict | None = None, **kw) -> pd.DataFrame:
     socios = socios or SOCIOS_API
     out = {}
