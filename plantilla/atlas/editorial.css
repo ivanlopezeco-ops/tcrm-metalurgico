@@ -1,0 +1,71 @@
+/* Variante editorial: Poppins para la jerarquía; Manrope para la consulta. */
+@font-face{font-family:Poppins;font-style:normal;font-weight:600;font-display:swap;src:url('data:font/ttf;base64,__POPPINS_600__') format('truetype')}
+:root{
+ --titulos:'Poppins','Segoe UI',sans-serif;
+ --figuras:'Manrope','Segoe UI',sans-serif;
+ --context-panel:#fafbfc;
+ --eje:#5a6472;
+ --pie:#5a6472;
+ --regla:#dde3e9;
+}
+:root[data-theme=dark]{--context-panel:#132333;--eje:#afc1d1;--pie:#afc1d1;--regla:#32495e}
+body:before,:root[data-theme=dark] body:before{display:none}
+.cab.compacta{
+ background:var(--panel);
+ grid-template-columns:auto minmax(0,1fr) auto auto;
+ padding:16px 20px;
+ margin:0;
+ gap:20px;
+ border-bottom:1px solid var(--regla);
+}
+.cab.compacta h1{font-family:var(--titulos);font-size:clamp(21px,1.8vw,27px);font-weight:600;line-height:1.2;letter-spacing:-.03em;color:var(--titulo)}
+.cab.compacta p.sello{font-size:12px;color:var(--eje);line-height:1.5;margin-top:5px}
+.cab.compacta .logos{gap:16px;flex-wrap:nowrap;min-width:0}
+.cab.compacta .logos img:first-child{height:32px;max-width:none;padding:0;background:transparent;box-sizing:border-box}
+.cab.compacta .logos img+img{height:32px;padding:0;border:0}
+.cab.compacta .modos{gap:16px;align-self:center}
+.cab.compacta .modos button{color:var(--eje);font-size:12px;min-height:44px}
+.cab.compacta .modos button:hover{color:var(--azul)}
+.cab.compacta .modos button[aria-pressed=true]{color:var(--azul);border-bottom-color:var(--azul)}
+.cab.compacta .theme{color:var(--cuerpo);border-color:var(--regla);background:transparent;min-height:44px}
+.cab.compacta .theme:hover{color:var(--azul);border-color:var(--azul);background:var(--seleccion)}
+:root[data-theme=dark] .cab.compacta .logos img{filter:invert(1);mix-blend-mode:screen}
+.barra-controles{background:var(--panel)}
+#resumenPrincipal{padding-top:15px;padding-bottom:15px}
+#resumenPrincipal .principal .v{font-family:var(--titulos);font-size:33px;font-weight:600;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--titulo)}
+#resumenPrincipal .principal .k{font-size:12px;color:var(--cuerpo)}
+#resumenPrincipal .principal .n{font-size:12px;color:var(--eje)}
+.chart-column .gcab h2,.stage>.basket>summary,.canasta-vacia strong{font-family:var(--titulos);font-weight:600;letter-spacing:-.02em}
+.chart-column .gcab h2{font-size:17px}
+.stage>.basket>summary{font-size:15px;color:var(--titulo)}
+.resumen-guia strong{font-weight:600}
+.equivalente-tip b,.consulta-equivalencia #dolar .dol-b .v{font-family:var(--tipo);font-variant-numeric:tabular-nums}
+.stage>.basket .caja>h2{font-family:var(--tipo)}
+.stage>.basket .detalle{border-top-color:var(--regla)}
+.view-note{padding:5px 0 0}
+@media(min-width:901px) and (max-width:1200px){
+ .cab.compacta{grid-template-columns:auto minmax(0,1fr) auto;gap:10px 20px;padding:14px 20px}
+ .cab.compacta .logos{grid-row:1 / 3}
+ .cab.compacta .t{grid-column:2;grid-row:1}
+ .cab.compacta .modos{grid-column:2;grid-row:2}
+ .cab.compacta .theme{grid-column:3;grid-row:1 / 3}
+}
+@media(max-width:900px){
+ .cab.compacta{grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:16px 14px 8px}
+ .cab.compacta .logos{grid-column:1;grid-row:1;gap:16px}
+ .cab.compacta .logos img:first-child{height:28px}
+ .cab.compacta .logos img+img{height:28px}
+ .cab.compacta .theme{grid-column:2;grid-row:1}
+ .cab.compacta .t{grid-column:1 / -1;grid-row:2}
+ .cab.compacta .modos{grid-column:1 / -1;grid-row:3;gap:20px}
+ .cab.compacta h1{font-size:24px;line-height:1.2;max-width:100%;text-wrap:balance}
+ #resumenPrincipal{padding:14px}
+ #resumenPrincipal .principal .v{font-size:30px}
+ .chart-column .gcab h2{font-size:16px}
+ .stage>.basket>summary{font-size:14px}
+}
+@media(max-width:360px){
+ .cab.compacta .logos{gap:12px}
+ .cab.compacta .logos img:first-child,.cab.compacta .logos img+img{height:24px}
+ .cab.compacta h1{font-size:22px}
+}

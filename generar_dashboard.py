@@ -15,6 +15,8 @@ import pandas as pd
 from tcrm_v3 import (ARCHIVOS, FAMILIAS, VENTANA_DEFECTO, VENTANAS, construir,
                      leer_base, matriz_bilaterales, pesos_moviles)
 
+from nombres import con_tildes
+
 BASE = Path(__file__).resolve().parent
 PLANTILLA = BASE / "plantilla"
 
@@ -23,6 +25,24 @@ PLANTILLA = BASE / "plantilla"
 # tiene pocas operaciones y su vector de ponderadores se mueve 7,5% mensual,
 # seis veces mas que cualquier otro rubro.
 OCULTAR_RUBROS = {"Buques y embarcaciones"}
+
+
+DOLAR = BASE / "datos" / "api_bcra" / "ARS_por_USD.csv"
+
+
+def _lista(s: pd.Series, dec: int = 2) -> list:
+    return [None if pd.isna(v) else round(float(v), dec) for v in s]
+
+
+def _dolar(bil: pd.DataFrame) -> dict | None:
+    """Dolar en pesos sobre los mismos ejes que los bilaterales del tablero."""
+    if not DOLAR.exists():
+        return None
+    s = pd.read_csv(DOLAR, index_col=0, parse_dates=True).iloc[:, 0]
+    return {
+        "mensual": _lista(s.resample("ME").mean().reindex(bil.resample("ME").mean().index)),
+        "diario": _lista(s.reindex(bil.loc["2015-11-01":].index)),
+    }
 
 
 def datos() -> dict:
@@ -83,7 +103,7 @@ def datos() -> dict:
                    for c in dia.columns if c != "ITCRM BCRA"},
     }
 
-    return {
+    return con_tildes({
         "grupos": grupos,
         "oficiales": oficiales,
         "mensual": empaquetar(bil.resample("ME").mean(), ofi.resample("ME").mean()),
@@ -93,8 +113,9 @@ def datos() -> dict:
         # promedio de diciembre en vez del dia exacto desvia 17%
         "diario": empaquetar(bil.loc["2015-11-01":], ofi.loc["2015-11-01":]),
         "presets": presets,
+        "dolar": _dolar(bil),
         "actualizado": pd.Timestamp.today().strftime("%Y-%m-%d"),
-    }
+    })
 
 
 def generar(destino: Path) -> Path:

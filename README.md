@@ -6,6 +6,42 @@ ponderadores propios para importaciones y exportaciones. Serie diaria desde
 
 Se actualiza solo todos los días hábiles. Ver `PUESTA_EN_MARCHA.md`.
 
+## Tablero Atlas v14
+
+La interfaz Atlas v14 conserva las series oficiales con ponderadores móviles
+y la canasta propia con pesos fijos. Incluye comparación opcional con BCRA,
+Estados Unidos y canastas sectoriales, lectura de puntos y dólar equivalente.
+El selector de importaciones/exportaciones explica el uso de orígenes y destinos.
+
+Los módulos editables están en `plantilla/atlas/`. `build.cjs` los integra sobre
+una base de interfaz congelada **sin datos** y genera `plantilla/cabecera.html`
+y `plantilla/cuerpo.html`. No editar esas plantillas generadas ni `publico/index.html`.
+
+```sh
+npm ci
+npm run build
+python generar_dashboard.py
+```
+
+La actualización diaria sigue ejecutando `python actualizar.py`: inserta las
+series calculadas en las plantillas y genera el HTML autocontenido. Las plantillas
+compiladas se versionan; el proceso diario no necesita Node. La cotización nominal
+del USD (`tipoCotizacion` del BCRA) se guarda aparte y se actualiza incrementalmente
+para la equivalencia; no interviene en el cálculo de los índices.
+
+Para comprobar compilación, integración y navegación:
+
+```sh
+npm run check:build
+python -m unittest discover -s tests -p 'test_*.py'
+npx playwright install chromium
+npm test
+```
+
+`Validar Atlas` ejecuta estos controles en los pull requests y guarda capturas.
+Ese workflow no publica. `Actualizar TCRM` conserva su horario y su mecanismo de
+publicación. Ver `plantilla/atlas/VALIDACION.md` para el alcance de las pruebas.
+
 ## Método
 
 Reponderación de los tipos de cambio reales bilaterales que publica el BCRA,

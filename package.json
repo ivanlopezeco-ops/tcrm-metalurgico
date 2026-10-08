@@ -1,0 +1,12 @@
+{
+  "name": "tcrm-metalurgico",
+  "private": true,
+  "scripts": {
+    "build": "node plantilla/atlas/build.cjs",
+    "check:build": "node plantilla/atlas/build.cjs --check",
+    "test": "node tests/datos-browser.cjs && node tests/browser-check.cjs && node tests/ubicacion-browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

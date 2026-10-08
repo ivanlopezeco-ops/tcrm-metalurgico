@@ -1,0 +1,24 @@
+/* Adaptación breve del movimiento FAL a una superficie de consulta. */
+.cab.compacta .modos .selection-marker{
+ display:block;
+ background:var(--seleccion);
+ border-bottom:2px solid var(--azul);
+}
+.cab.compacta .modos button[aria-pressed=true]{background:transparent!important;border-bottom-color:transparent}
+.barra-controles .lado.seleccion-deslizante button[aria-pressed=true]{background:transparent!important}
+.selection-marker.mover{transition:transform 300ms cubic-bezier(.2,.8,.2,1)}
+.cab.compacta .modos button,.barra-controles .lado button{transition:color 160ms ease-out}
+button:not(:disabled),.panel-comparaciones>summary{transition:background-color 160ms ease-out,color 160ms ease-out,border-color 160ms ease-out,transform 100ms ease-out}
+button:not(:disabled):active,.panel-comparaciones>summary:active{transform:scale(.98)}
+.acciones-lectura{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.acciones-lectura .cerrar-lectura{margin-top:0;background:transparent;color:var(--eje)}
+.copiar-lectura{font:inherit;font-size:12px;background:var(--azul);color:#fff;border:0;min-height:36px;padding:7px 10px;cursor:pointer}
+:root[data-theme=dark] .copiar-lectura{color:#091421}
+.copiar-lectura:disabled{opacity:.65;cursor:wait}
+.estado-copia{font-size:11px;color:var(--eje);line-height:1.4;margin:6px 0 0}
+.estado-copia:empty{display:none}
+.copia-manual{margin-top:8px}
+.copia-manual label{font-size:12px;color:var(--cuerpo)}
+.copia-manual textarea{display:block;width:100%;margin-top:5px;padding:8px;font-family:var(--tipo);font-size:12px;line-height:1.45;color:var(--cuerpo);background:var(--context-panel);border:1px solid var(--regla);resize:vertical}
+@media(max-width:900px){.copiar-lectura{min-height:44px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

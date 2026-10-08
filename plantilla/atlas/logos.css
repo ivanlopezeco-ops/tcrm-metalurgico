@@ -1,0 +1,22 @@
+/* Identidad visible arriba, con menor tamaño que en v12. */
+.cab.compacta{grid-template-columns:auto minmax(0,1fr) auto auto;gap:16px}
+.cab.compacta .logos{grid-column:1;grid-row:1;gap:12px}
+.cab.compacta .logos img:first-child,.cab.compacta .logos img+img{height:22px;width:auto;max-width:none;padding:0;border:0;background:transparent}
+.cab.compacta .t{grid-column:2;grid-row:1}
+.cab.compacta .modos{grid-column:3;grid-row:1}
+.cab.compacta .theme{grid-column:4;grid-row:1}
+@media(min-width:901px) and (max-width:1200px){
+ .cab.compacta{grid-template-columns:auto minmax(0,1fr) auto;gap:8px 16px}
+ .cab.compacta .logos{grid-column:1;grid-row:1 / 3}
+ .cab.compacta .t{grid-column:2;grid-row:1}
+ .cab.compacta .modos{grid-column:2;grid-row:2}
+ .cab.compacta .theme{grid-column:3;grid-row:1 / 3}
+}
+@media(max-width:900px){
+ .cab.compacta{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+ .cab.compacta .logos{grid-column:1;grid-row:1;gap:12px}
+ .cab.compacta .logos img:first-child,.cab.compacta .logos img+img{height:20px}
+ .cab.compacta .theme{grid-column:2;grid-row:1}
+ .cab.compacta .t{grid-column:1 / -1;grid-row:2}
+ .cab.compacta .modos{grid-column:1 / -1;grid-row:3}
+}
