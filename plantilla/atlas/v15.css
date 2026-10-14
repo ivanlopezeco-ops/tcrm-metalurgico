@@ -1,0 +1,822 @@
+/* ===== Atlas v15: una superficie de trabajo, jerarquía de lectura y modo embebido ===== */
+:root{
+ --tipo:'Manrope','Segoe UI',sans-serif;--figuras:'Manrope','Segoe UI',sans-serif;--titulos:'Poppins','Segoe UI',sans-serif;
+ --fondo:#eef2f6;--panel:#fff;--blanco:#fff;--barra:#f7f9fb;--context-panel:#f5f8fb;--resultados-panel:#fff;--controles-panel:#f7f9fb;
+ --azul:#0B4EA2;--azul2:#4A90D9;--titulo:#12212F;--cuerpo:#2B3644;--eje:#56616e;--pie:#5A6472;
+ --regla:#dde3ea;--grilla:#edf0f4;--seleccion:#e8f0fa;--foco:#0B4EA2;--signal:#0B4EA2;
+ --sobre-azul:#fff;--sombra-superficie:0 1px 2px #12212f0f,0 14px 34px -14px #12212f33;
+ --shadow-tip:0 12px 32px -8px #12212f40;--radio:10px;--radio-control:6px
+}
+:root[data-theme=dark]{
+ --fondo:#0d131c;--panel:#141e2b;--blanco:#141e2b;--barra:#111a26;--context-panel:#172334;--resultados-panel:#141e2b;--controles-panel:#111a26;
+ --azul:#62cafa;--azul2:#86afd4;--titulo:#f1f5f9;--cuerpo:#d3dde8;--eje:#a7b7c8;--pie:#a7b7c8;
+ --regla:#2a3a4b;--grilla:#202e3e;--seleccion:#173247;--foco:#62cafa;--signal:#62cafa;
+ --sobre-azul:#0d131c;--sombra-superficie:0 1px 2px #0006,0 18px 40px -18px #000c;--shadow-tip:0 14px 36px -10px #000d
+}
+html,body{background:var(--fondo)}
+body{font-family:var(--tipo);color:var(--cuerpo)}
+body:before,:root[data-theme=dark] body:before{display:none}
+#app{max-width:1440px;padding:18px 28px 28px}
+:focus-visible{outline:2px solid var(--foco);outline-offset:2px}
+
+/* Cabecera: identidad pequeña, título y tema en una sola línea */
+.cab.compacta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:0 20px;
+ padding:2px 0 16px;margin:0;background:transparent;border:0;box-shadow:none}
+.cab.compacta .logos{grid-column:1;grid-row:1;display:flex;align-items:center;gap:12px;padding:0 20px 0 0;margin:0;border:0;border-right:1px solid var(--regla)}
+.cab.compacta .logos img:first-child,.cab.compacta .logos img+img{height:22px}
+.cab.compacta .t{grid-column:2;grid-row:1;min-width:0}
+.cab.compacta h1{font-family:var(--titulos);font-size:clamp(20px,1.7vw,25px);font-weight:600;letter-spacing:-.025em;line-height:1.2;color:var(--titulo)}
+.cab.compacta .theme{grid-column:3;grid-row:1;width:38px;height:38px;min-height:38px;padding:0;display:grid;place-items:center;
+ border:1px solid var(--regla);border-radius:var(--radio-control);background:var(--panel);color:var(--cuerpo)}
+.cab.compacta .theme span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cab.compacta .theme:hover{color:var(--azul);border-color:var(--azul)}
+
+/* Superficie única: controles, cifras, gráfico y canasta en el mismo plano */
+.superficie{background:var(--panel);border:1px solid var(--regla);border-radius:var(--radio);box-shadow:var(--sombra-superficie);overflow:clip}
+.superficie .stage{box-shadow:none;background:var(--panel);border-radius:0}
+
+/* Franja superior: tipo de canasta y sello de actualización */
+.franja-modos{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 24px;padding:0 24px;border-bottom:1px solid var(--regla);background:var(--panel)}
+.franja-modos .modos{display:flex;gap:28px;margin:0;padding:0;border:0;background:none}
+.franja-modos .modos button,.cab.compacta .franja-modos .modos button{position:relative;background:none!important;border:0;border-radius:0;padding:15px 0 13px;min-height:48px;
+ font:600 13.5px/1.2 var(--tipo);color:var(--eje);letter-spacing:0}
+.franja-modos .modos button::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--azul);transform:scaleX(0);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.franja-modos .modos button[aria-pressed=true]{color:var(--titulo)}
+.franja-modos .modos button[aria-pressed=true]::after{transform:scaleX(1)}
+.franja-modos .modos button:hover{color:var(--azul)}
+.franja-modos .selection-marker{display:none}
+.franja-modos .modos button+button{border-left:0}
+.franja-modos .sello{margin:0;padding:0 0 15px;font-size:12px;font-weight:500;color:var(--eje)}
+
+/* Controles: el flujo primero y con peso propio; el rubro acotado a su contenido */
+.barra-controles{display:block;padding:0;background:var(--controles-panel);border-bottom:1px solid var(--regla)}
+.barra-controles .scope{display:grid;grid-template-columns:minmax(340px,420px) minmax(240px,400px) 1fr;gap:28px;align-items:end;padding:18px 24px 20px}
+.titulo-flujo{margin-bottom:8px}
+.titulo-flujo>span,.barra-controles .scope-field label{font-size:12px;font-weight:600;color:var(--titulo);letter-spacing:.01em}
+.ayuda-flujo{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--azul);text-decoration:none}
+.ayuda-flujo::before{content:'i';display:grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;font:700 10px/1 var(--tipo)}
+.ayuda-flujo:hover{text-decoration:underline;text-underline-offset:3px}
+.barra-controles .selector-flujo .lado{position:relative;border:1px solid var(--regla);border-radius:8px;overflow:hidden;background:var(--panel);padding:0}
+.barra-controles .selector-flujo .lado button{position:relative;z-index:1;text-align:center;min-height:54px;background:transparent!important;color:var(--cuerpo);border:0;transition:color .2s}
+.barra-controles .selector-flujo .lado button+button{border-left:1px solid var(--regla)}
+.barra-controles .selector-flujo .lado button strong{font-size:14px;font-weight:700}
+.barra-controles .selector-flujo .lado button .detalle-flujo{font-size:11.5px;color:var(--eje);transition:color .2s}
+.barra-controles .selector-flujo .lado button[aria-pressed=true],.barra-controles .selector-flujo .lado button[aria-pressed=true] strong{color:var(--sobre-azul)}
+.barra-controles .selector-flujo .lado button[aria-pressed=true] .detalle-flujo{color:var(--sobre-azul);opacity:.82}
+.selector-flujo .selection-marker{z-index:0;background:var(--azul);border:0}
+.barra-controles .scope-field{gap:8px}
+.barra-controles .scope-field select{height:54px;padding:0 40px 0 16px;border:1px solid var(--regla);border-radius:8px;background-color:var(--panel);
+ font:600 14px var(--tipo);color:var(--titulo);cursor:pointer}
+.barra-controles .scope-field select:hover{border-color:var(--azul)}
+.rubros-preview{border-radius:8px;border:1px solid var(--regla);background:var(--panel);overflow:hidden auto}
+.explicacion-flujo{border-radius:8px;padding:16px 18px;font-size:12.5px;max-width:min(380px,calc(100vw - 24px))}
+.explicacion-flujo strong{font-family:var(--titulos);font-weight:600;font-size:13.5px}
+
+/* Cifras: tres lecturas de igual rango */
+#resumenPrincipal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:0;background:var(--resultados-panel);border-bottom:1px solid var(--regla)}
+#resumenPrincipal>h2,#resumenPrincipal>.fecha-actual{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+#resumenPrincipal .principal{display:flex;flex-direction:column;gap:2px;padding:18px 24px 20px;margin:0;border:0;min-width:0}
+#resumenPrincipal .principal+.principal{border-left:1px solid var(--regla)}
+#resumenPrincipal .principal .k{font-size:12px;font-weight:600;color:var(--cuerpo);letter-spacing:.01em}
+#resumenPrincipal .principal .v{font-family:var(--titulos);font-size:32px;font-weight:600;letter-spacing:-.03em;line-height:1.15;color:var(--titulo);margin:4px 0 2px;font-variant-numeric:tabular-nums}
+#resumenPrincipal .principal .n{font-size:12.5px;line-height:1.45;color:var(--eje)}
+#resumenPrincipal .cifra-dolar{position:relative;text-align:left;background:linear-gradient(90deg,var(--seleccion),transparent 85%)}
+#resumenPrincipal .cifra-dolar .v{color:var(--azul)}
+#resumenPrincipal .cifra-dolar #abrirPromedio{align-self:flex-start;margin-top:6px;padding:0;border:0;background:none;font:600 12px var(--tipo);color:var(--azul);
+ text-decoration:underline;text-underline-offset:3px;min-height:24px;cursor:pointer}
+#resumenPrincipal .cifra-dolar .cotizacion-resumen{font-size:11.5px}
+#resumenPrincipal .cifra-dolar .k{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.condicional{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--azul);padding:2px 7px;border:1px solid currentColor;border-radius:999px;opacity:.85}
+#resumenPrincipal .principal{padding-top:16px;padding-bottom:16px}
+
+/* Gráfico */
+.stage{grid-template-columns:minmax(0,1fr) 320px}
+.chart-column{padding:0;background:var(--panel)}
+.chart-column>.caja{padding:20px 24px 18px;margin:0;border:0;background:transparent}
+.chart-column .gcab h2{font-family:var(--titulos);font-size:17px;font-weight:600;color:var(--titulo);letter-spacing:-.02em}
+.chart-column .gcab .et{font-size:12px;color:var(--eje)}
+.indice-actual{font-size:12.5px;color:var(--eje);margin-top:2px}
+.chart-column canvas{height:clamp(280px,calc(100svh - 470px),440px)}
+.guia-grafico{font-size:12px;color:var(--eje);margin-top:4px}
+.guia-grafico button{font-size:12px;color:var(--azul)}
+.claves{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding:12px 0 0;margin-top:8px;border-top:1px solid var(--grilla)}
+#claves{display:flex;flex-wrap:wrap;gap:6px 18px}
+#claves .l{font-size:12.5px;font-weight:600;color:var(--cuerpo)}
+#claves .l i{width:22px;height:3px;border-radius:2px}
+.panel-comparaciones>summary,:root[data-theme=dark] .panel-comparaciones>summary{list-style:none;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;min-height:40px;
+ background:transparent;color:var(--azul);border:1px solid var(--regla);border-radius:var(--radio-control);font:600 13px var(--tipo);outline:none;filter:none;cursor:pointer}
+.panel-comparaciones>summary::-webkit-details-marker{display:none}
+.panel-comparaciones>summary::before{content:'+';font-size:17px;line-height:1;font-weight:500}
+.panel-comparaciones>summary:hover{border-color:var(--azul);background:var(--seleccion)}
+.panel-comparaciones[open]>summary{border-color:var(--azul);background:var(--seleccion);outline:none}
+.panel-comparaciones[open]>summary::before{content:'−'}
+.contenido-comparaciones{border-radius:8px;border:1px solid var(--regla);background:var(--panel)}
+.comparabtn.ambas-canastas{border-radius:var(--radio-control)}
+.quitar-referencia{font-size:11.5px;color:var(--eje)}
+
+/* Período: atajos y deslizador en una sola línea */
+.periodo{margin-top:14px;padding-top:12px;border-top:1px solid var(--grilla)}
+.atajos{border:0;gap:2px;background:none}
+.atajos button{border:0;border-radius:var(--radio-control);padding:6px 10px;font:600 12.5px var(--tipo);color:var(--eje);background:transparent}
+.atajos button[aria-pressed=true]{color:var(--azul);background:var(--seleccion)}
+.atajos .selection-marker{display:none}
+.rango{font-size:12.5px;font-weight:600;color:var(--cuerpo)}
+
+/* Consultas al pie del gráfico */
+.soporte-grafico{margin:0;padding:0 24px 18px;gap:0 24px}
+.soporte-grafico>details>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 0;font-size:13px;font-weight:600;color:var(--cuerpo);cursor:pointer;border-top:1px solid var(--grilla)}
+.soporte-grafico>details>summary::-webkit-details-marker{display:none}
+.soporte-grafico>details>summary::before{content:'';width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .2s;flex:none}
+.soporte-grafico>details[open]>summary::before{transform:rotate(45deg)}
+.soporte-grafico>details>summary:hover{color:var(--azul)}
+.columna-equivalencia,.columna-equivalencia #cajaDolar{background:var(--context-panel);border-radius:8px}
+
+/* Canasta */
+.stage>.basket{background:var(--context-panel);border-left:1px solid var(--regla)}
+.stage>.basket>summary{font-family:var(--titulos);font-size:15px;font-weight:600;color:var(--titulo);padding:20px 20px 4px}
+.stage>.basket .basket-body{padding:0 20px 20px}
+.stage>.basket .caja>h2{font-size:12px;font-weight:600;color:var(--eje)}
+.basket .pais{min-height:36px}
+.basket .pais .n{font-size:13px;color:var(--cuerpo)}
+.basket .pais .w{font-size:12.5px;font-weight:700;color:var(--titulo);font-variant-numeric:tabular-nums}
+.basket .pais input[type=checkbox]{accent-color:var(--azul)}
+.basket .peso-bar{background:var(--grilla);border-radius:2px}
+.basket .peso-bar i{background:var(--azul);border-radius:2px}
+.basket .vertodos{font-size:12.5px;font-weight:600;color:var(--azul);text-align:left;padding:8px 0}
+.basket .acciones{gap:16px;justify-content:flex-start}
+.basket .acciones button{background:none!important;border:0;padding:4px 0;min-height:32px;font:600 12.5px var(--tipo);color:var(--eje);text-decoration:underline;text-underline-offset:3px}
+.basket .acciones button:hover{color:var(--azul)}
+.basket .acciones #bBorrar{padding:9px 16px;border:1px solid var(--regla);border-radius:var(--radio-control);text-decoration:none;color:var(--cuerpo);background:var(--panel)!important}
+.stage>.basket .detalle{font-size:12px;color:var(--eje);border-top:1px solid var(--regla);padding-top:12px}
+.stage>.basket .detalle b{color:var(--titulo);font-weight:700}
+.ayuda-pesos{font-size:12.5px;line-height:1.5;color:var(--cuerpo);padding:10px 12px;margin:6px 0 10px;background:var(--seleccion);border-radius:var(--radio-control)}
+.cab-pesos{font-size:11px;font-weight:600;color:var(--eje)}
+#canastaLista input{border:1px solid var(--regla);border-radius:var(--radio-control);background:var(--panel);font:600 14px var(--tipo);color:var(--titulo)}
+#canastaLista input:focus{border-color:var(--azul)}
+.canasta-vacia strong{font-family:var(--titulos);font-weight:600;color:var(--titulo)}
+
+/* Lectura del gráfico */
+.tip,.tip.con-bcra{border:1px solid var(--regla);border-radius:8px;background:var(--panel);box-shadow:var(--shadow-tip)}
+.tip .f{font-weight:700;color:var(--titulo)}
+.tip .equivalente-tip b{font-family:var(--titulos);font-weight:600;color:var(--azul)}
+.tip .copiar-lectura{border-radius:var(--radio-control)}
+
+.pie-identidad{padding:14px 2px 0}
+.pie-identidad .view-note{color:var(--eje)}
+
+@media(max-width:1180px){
+ .barra-controles .scope{grid-template-columns:minmax(300px,1fr) minmax(220px,1fr)}
+ .stage{grid-template-columns:minmax(0,1fr) 280px}
+}
+@media(max-width:900px){
+ #app{padding:12px 12px 24px}
+ .cab.compacta{grid-template-columns:minmax(0,1fr) auto;gap:10px 12px;padding:0 0 12px}
+ .cab.compacta .logos{grid-column:1;grid-row:1;border:0;padding:0}
+ .cab.compacta .logos img:first-child,.cab.compacta .logos img+img{height:20px}
+ .cab.compacta .theme{grid-column:2;grid-row:1}
+ .cab.compacta .t{grid-column:1 / -1;grid-row:2}
+ .cab.compacta h1{font-size:22px}
+ .franja-modos{flex-wrap:wrap;padding:0 16px}
+ .franja-modos .modos{gap:22px}
+ .franja-modos .sello{width:100%;padding:0 0 10px;font-size:11.5px}
+ .barra-controles .scope{grid-template-columns:minmax(0,1fr);gap:16px;padding:16px}
+ .barra-controles .scope-field label{display:block}
+ #resumenPrincipal{grid-template-columns:1fr 1fr}
+ #resumenPrincipal .principal{padding:14px 16px}
+ #resumenPrincipal .principal .v{font-size:26px}
+ #resumenPrincipal .cifra-dolar{grid-column:1 / -1;border-left:0!important;border-top:1px solid var(--regla)}
+ .stage{grid-template-columns:minmax(0,1fr)}
+ .chart-column>.caja{padding:16px}
+ .chart-column canvas{height:280px}
+ .soporte-grafico{padding:0 16px 12px}
+ .periodo{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+ .periodo .pfila{order:-1}
+ .stage>.basket{border-left:0;border-top:1px solid var(--regla)}
+ .stage>.basket>summary{padding:16px}
+ .stage>.basket .basket-body{padding:0 16px 16px}
+ .stage.propia-cierre .canasta,.stage.propia-cierre #canastaLista{max-height:none;overflow:visible}
+}
+
+/* ===== Modo embebido en la sección Tableros de la web ===== */
+html.embebido,html.embebido body{background:var(--panel);min-height:0}
+html.embebido #app{max-width:none;padding:0}
+html.embebido .cab.compacta{display:none}
+html.embebido .superficie{border:0;border-radius:0;box-shadow:none}
+html.embebido .pie-identidad{display:none}
+html.embebido .chart-column canvas{height:380px}
+@media(max-width:900px){html.embebido .chart-column canvas{height:260px}}
+
+/* Compacto en escritorio: el tablero principal entra en una pantalla (criterio aprobado en v14) */
+@media(min-width:901px){
+ .cab.compacta{padding:0 0 12px}
+ .cab.compacta h1{font-size:clamp(20px,1.6vw,23px)}
+ .franja-modos .modos button{padding:12px 0 11px;min-height:44px}
+ .franja-modos .sello{padding-bottom:12px}
+ .barra-controles .scope{padding:12px 24px 14px;gap:24px}
+ .titulo-flujo{margin-bottom:6px}
+ .barra-controles .selector-flujo .lado button{min-height:48px}
+ .barra-controles .scope-field select{height:48px}
+ .barra-controles .scope-field{gap:6px}
+ #resumenPrincipal .principal{padding:12px 24px 14px}
+ #resumenPrincipal .principal .v{font-size:28px;margin:2px 0 0}
+ #app{padding-top:12px}
+ .cab.compacta .theme{width:34px;height:34px;min-height:34px}
+ #resumenPrincipal .cifra-dolar{display:grid;grid-template-columns:auto 1fr;column-gap:16px;row-gap:0;align-content:start}
+ #resumenPrincipal .cifra-dolar .k{grid-column:1 / -1;grid-row:1;padding-right:96px}
+ #resumenPrincipal .cifra-dolar #abrirPromedio{position:absolute;top:12px;right:24px;margin:0;min-height:18px}
+ #resumenPrincipal .cifra-dolar .v{grid-row:2 / 4;grid-column:1;align-self:center}
+ #resumenPrincipal .cifra-dolar .n{grid-column:2;grid-row:2;align-self:end}
+ #resumenPrincipal .cifra-dolar .cotizacion-resumen{grid-column:2;grid-row:3;align-self:start}
+ .chart-column>.caja{padding:14px 24px 12px}
+ .chart-column .gcab{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px}
+ .chart-column .gcab>div:first-child{display:flex;flex-direction:column;gap:2px}
+ .gcab-derecha{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
+ .gcab-derecha .guia-grafico{margin:0;display:flex;gap:12px;justify-content:flex-end}
+ .chart-column canvas{height:clamp(210px,calc(100svh - 558px),440px)}
+ .periodo{margin-top:4px}
+ .soporte-grafico>details>summary{padding:7px 0}
+ .claves{padding-top:8px;margin-top:4px}
+ .panel-comparaciones>summary,:root[data-theme=dark] .panel-comparaciones>summary{min-height:36px;padding:7px 12px}
+ .periodo{margin-top:8px;padding-top:8px}
+ .soporte-grafico>details>summary{padding:10px 0}
+ .soporte-grafico{padding-bottom:8px}
+ .stage>.basket>summary{padding-top:16px}
+}
+@media(min-width:901px){
+ .cab.compacta{min-height:0;padding:0 0 10px}
+ .stage>.basket>summary{padding:14px 20px 2px}
+ .stage>.basket .caja>h2{padding:0 0 4px;margin:0;line-height:1.4}
+ .basket .pais{min-height:28px;padding-top:2px;padding-bottom:2px}
+ .stage>.basket .caja:has(#paises)>.cuerpo{display:flex;flex-wrap:wrap;align-items:center;column-gap:12px}
+ .stage>.basket .caja:has(#paises)>.cuerpo>#paises{flex:0 0 100%}
+ .basket .vertodos{flex:1 1 auto;width:auto;padding:6px 0}
+ .basket .acciones{flex:0 0 auto;margin:0}
+ .stage>.basket .detalle{padding-top:8px;margin-top:6px;line-height:1.45}
+}
+@media(min-width:901px){
+ .stage>.basket>summary{padding-top:12px}
+ .basket .pais{row-gap:3px}
+ .stage>.basket .detalle{padding-top:6px;margin-top:4px;padding-bottom:0}
+ .stage>.basket .basket-body{padding-bottom:12px}
+}
+/* Anchos intermedios (incluye el marco de la web, ~990 px): guía bajo el título y dólar apilado */
+@media(min-width:901px) and (max-width:1250px){
+ .chart-column .gcab{flex-wrap:wrap;row-gap:4px}
+ .gcab-derecha{flex:1 1 100%;flex-direction:row-reverse;justify-content:space-between;align-items:baseline;text-align:left}
+ #resumenPrincipal .cifra-dolar{display:flex;flex-direction:column;align-items:flex-start;text-align:left}
+ #resumenPrincipal .cifra-dolar .k{padding-right:0}
+ #resumenPrincipal .cifra-dolar #abrirPromedio{position:static;margin-top:4px}
+ .barra-controles .scope{grid-template-columns:minmax(300px,1fr) minmax(220px,1fr)}
+}
+
+/* ===== Revisión integral (10/10) ===== */
+/* Período en la barra de controles: flujo, rubro y período, de lo general a lo particular */
+.barra-controles .scope{grid-template-columns:minmax(320px,400px) minmax(220px,340px) auto;justify-content:start}
+.campo-periodo{display:flex;flex-direction:column;gap:6px;min-width:0}
+.campo-periodo[hidden]{display:none}
+.etiqueta-periodo{font-size:12px;font-weight:600;color:var(--titulo);letter-spacing:.01em;line-height:16px}
+.campo-periodo .atajos{display:flex;gap:0;height:48px;padding:0;border:1px solid var(--regla);border-radius:8px;background:var(--panel);overflow:hidden;width:auto}
+.campo-periodo .atajos button{flex:1 1 auto;height:100%;min-height:0;border-radius:0;padding:0 14px;font:600 13px var(--tipo);color:var(--eje);background:transparent;white-space:nowrap}
+.campo-periodo .atajos button+button{border-left:1px solid var(--regla)}
+.campo-periodo .atajos button:hover{color:var(--azul);background:var(--seleccion)}
+.campo-periodo .atajos button[aria-pressed=true]{color:var(--azul);background:var(--seleccion);box-shadow:inset 0 -2px 0 var(--azul)}
+/* bajo el gráfico queda solo el ajuste fino del período */
+.periodo .pfila{display:contents}
+.periodo{display:flex;align-items:center;gap:16px}
+.periodo .slider{flex:1 1 auto}
+.periodo #rangoTxt{flex:none;order:2}
+
+/* Consulta del dólar: sin título repetido; desplegables internos con el mismo chevrón */
+.consulta-equivalencia #cajaDolar>h2{display:none}
+.sensitivity>summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:var(--azul)}
+.sensitivity>summary::-webkit-details-marker{display:none}
+.sensitivity>summary::before{content:'';width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .2s;flex:none}
+.sensitivity[open]>summary::before{transform:rotate(45deg)}
+
+/* Canasta propia: filas compactas; los países cargados se destacan */
+.stage .canasta .fila{min-height:0;padding:5px 0;row-gap:4px;align-items:center}
+.stage .canasta .fila .n{font-size:13px;color:var(--cuerpo)}
+.stage .canasta .fila.cero .n{color:var(--eje)}
+.stage .canasta .fila:not(.cero) .n{color:var(--titulo);font-weight:700}
+.stage .canasta .fila:not(.cero) .pc{color:var(--azul);font-weight:700}
+.stage .canasta .fila input{height:34px}
+@media(min-width:901px){.stage .canasta{max-height:360px}}
+
+@media(min-width:901px) and (max-width:1250px){.barra-controles .scope{grid-template-columns:minmax(280px,1fr) minmax(200px,1fr)}.campo-periodo{grid-column:1 / -1}.campo-periodo .atajos{max-width:520px}}
+@media(max-width:900px){
+ .barra-controles .scope{grid-template-columns:minmax(0,1fr)}
+ .campo-periodo{grid-column:auto}
+ .campo-periodo .atajos{height:44px}
+ .campo-periodo .atajos button{padding:0 6px;font-size:12.5px}
+ .periodo{gap:10px}
+ .barra-controles .selector-flujo .lado button strong{font-size:13.5px;line-height:1.25}
+ /* lectura fijada debajo del gráfico: la curva queda a la vista */
+ .chart-column .tip,.chart-column .tip.con-bcra{position:static!important;width:auto!important;max-width:none!important;max-height:none;margin-top:10px;transform:none!important}
+ .chart-column .tip:not(.ver){display:none}
+}
+#resumenPrincipal .cifra-dolar,#resumenPrincipal .cifra-dolar>*{text-align:left}
+/* filas de la canasta propia: la barra de peso va en la base de la fila, sin ocupar una línea propia */
+.stage .canasta .fila{position:relative;grid-template-rows:auto;padding:4px 0 6px}
+.stage .canasta .fila .peso-bar{position:absolute;left:0;bottom:0;width:calc(100% - 120px);height:2px}
+@media(max-width:900px){
+ .periodo{flex-direction:column;align-items:stretch}
+ .periodo .slider{flex:none;width:100%}
+ .periodo #rangoTxt{order:-1}
+}
+
+/* ===== Tanda 3 (11/10): legibilidad de la canasta propia, color, profundidad y movimiento ===== */
+/* Canasta propia: cada país es una fila clara, con nombre legible, separador y foco visible */
+.stage .canasta .fila{padding:6px 10px 8px;margin:0 -10px;border-bottom:1px solid var(--regla);border-radius:6px;transition:background .15s}
+.stage .canasta .fila:hover{background:var(--seleccion)}
+.stage .canasta .fila:focus-within{background:var(--seleccion);box-shadow:inset 3px 0 0 var(--azul)}
+.stage .canasta .fila .n,.stage .canasta .fila.cero .n{font-size:14px;font-weight:500;color:var(--titulo)}
+.stage .canasta .fila:not(.cero) .n{font-weight:700;color:var(--azul)}
+.stage .canasta .fila input{height:38px;font-size:15px;text-align:right;padding:0 10px}
+.stage .canasta .fila.cero input{color:var(--eje)}
+.stage .canasta .fila .pc{font-size:13px;color:var(--eje);text-align:right}
+.stage .canasta .fila .peso-bar{left:10px;bottom:3px;width:calc(100% - 140px)}
+.stage .canasta .fila.cero .peso-bar{display:none}
+.cab-pesos{padding:0 0 8px;margin-bottom:2px}
+.cab-pesos span{font-size:11.5px;font-weight:700;color:var(--cuerpo)}
+
+/* Banda azul noche detrás de la cabecera, con la diagonal del logo; la superficie apoya sobre ella */
+:root{--noche:linear-gradient(150deg,#071F42 0%,#0A3F86 62%,#0E58B5 100%)}
+:root[data-theme=dark]{--noche:linear-gradient(150deg,#040d1a 0%,#0a2448 65%,#0d3466 100%)}
+html:not(.embebido) body:before,:root[data-theme=dark]:not(.embebido) body:before{display:block;content:'';position:absolute;inset:0 0 auto;height:178px;z-index:-1;
+ background:var(--noche);clip-path:polygon(0 0,100% 0,100% 72%,0 100%)}
+html:not(.embebido) .cab.compacta h1{color:#fff}
+html:not(.embebido) .cab.compacta .logos{border-right-color:rgba(255,255,255,.22)}
+html:not(.embebido) .cab.compacta .logos img{filter:brightness(0) invert(1);mix-blend-mode:normal}
+html:not(.embebido) .cab.compacta .theme{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:#fff}
+html:not(.embebido) .cab.compacta .theme:hover{background:rgba(255,255,255,.16);border-color:#fff;color:#fff}
+.superficie{box-shadow:0 1px 2px #12212f14,0 24px 48px -24px #0a2a5a59}
+:root[data-theme=dark] .superficie{box-shadow:0 1px 2px #0008,0 24px 48px -20px #000}
+
+/* Cifras: palabra de sentido (en color neutro) y el dólar como foco, sobre azul noche */
+#resumenPrincipal .principal .sentido{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--cuerpo)}
+#resumenPrincipal .principal .sentido::before{content:'';width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent}
+#resumenPrincipal .principal .sentido.baja::before{border-top:6px solid currentColor}
+#resumenPrincipal .principal .sentido.sube::before{border-bottom:6px solid currentColor}
+#resumenPrincipal .cifra-dolar{background:var(--noche);color:#fff;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%,0 14px)}
+#resumenPrincipal .cifra-dolar .k,#resumenPrincipal .cifra-dolar .n{color:rgba(255,255,255,.82)}
+#resumenPrincipal .cifra-dolar .v{color:#fff}
+#resumenPrincipal .cifra-dolar .cotizacion-resumen{color:rgba(255,255,255,.66)}
+#resumenPrincipal .cifra-dolar #abrirPromedio{color:#A9D4FF}
+#resumenPrincipal .cifra-dolar .condicional{color:#A9D4FF;border-color:rgba(169,212,255,.55)}
+
+/* Canasta sectorial: barra de composición en escala azul, en lugar del subtítulo */
+.stage>.basket .caja.composition{display:block;margin:8px 0 4px;padding:0;border:0;background:none}
+.stage>.basket .caja.composition .cuerpo{padding:0}
+.stage>.basket .caja.composition #leyenda,.stage>.basket .caja.composition #aviso{display:none}
+.stage>.basket #barra{height:10px;gap:2px;border-radius:5px;background:var(--grilla)}
+.stage>.basket #barra .seg{background:#C5D6EA!important;transition:flex .5s cubic-bezier(.2,.8,.2,1)}
+.stage>.basket #barra .seg:nth-child(1){background:#0B4EA2!important}
+.stage>.basket #barra .seg:nth-child(2){background:#2F6DB5!important}
+.stage>.basket #barra .seg:nth-child(3){background:#4A90D9!important}
+.stage>.basket #barra .seg:nth-child(4){background:#7FB0E3!important}
+.stage>.basket #barra .seg:nth-child(5){background:#A6C8EC!important}
+:root[data-theme=dark] .stage>.basket #barra .seg{background:#2c4664!important}
+:root[data-theme=dark] .stage>.basket #barra .seg:nth-child(1){background:#62cafa!important}
+:root[data-theme=dark] .stage>.basket #barra .seg:nth-child(2){background:#3fa3dc!important}
+:root[data-theme=dark] .stage>.basket #barra .seg:nth-child(3){background:#2f80b8!important}
+:root[data-theme=dark] .stage>.basket #barra .seg:nth-child(4){background:#2a6594!important}
+.stage>.basket .caja:has(#paises)>h2{display:none}
+.basket .peso-bar{height:4px;border-radius:2px}
+
+/* Movimiento discreto: la superficie entra por partes al cargar; las cifras cuentan una vez */
+@media(prefers-reduced-motion:no-preference){
+ .entra{animation:entraV15 .55s cubic-bezier(.2,.8,.2,1) both}
+ @keyframes entraV15{from{opacity:0;transform:translateY(10px)}}
+ .panel-comparaciones>summary,.atajos button,#bBorrar{transition:background .2s,border-color .2s,color .2s,transform .15s}
+ .panel-comparaciones>summary:active,#bBorrar:active{transform:translateY(1px)}
+}
+.stage .canasta .fila{flex-shrink:0}
+#resumenPrincipal .cifra-dolar{align-self:stretch;margin:0;height:auto}
+@media(min-width:1251px){
+ #resumenPrincipal .principal:not(.cifra-dolar){display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:baseline}
+ #resumenPrincipal .principal:not(.cifra-dolar) .k,#resumenPrincipal .principal:not(.cifra-dolar) .v{grid-column:1 / -1}
+ #resumenPrincipal .principal:not(.cifra-dolar) .n{grid-column:2}
+ #resumenPrincipal .principal:not(.cifra-dolar) .n::before{content:'·';margin-right:8px;color:var(--eje)}
+}
+@media(min-width:1251px){
+ #resumenPrincipal .principal:not(.cifra-dolar){align-content:start}
+ #resumenPrincipal .principal:not(.cifra-dolar) .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media(min-width:901px){.stage>.basket .caja.composition{margin:4px 0 0}.stage>.basket>summary{padding-bottom:0}.stage>.basket .detalle{margin-top:2px}}
+
+/* ===== Tanda 4 (11/10): revisión integral, sin reordenar bloques ===== */
+:root{--canasta-otra:#6f8fb3;
+ --icono-mas:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 3v10M3 8h10' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>");
+ --icono-menos:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 8h10' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>");
+ --icono-info:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6.6' fill='none' stroke='black' stroke-width='1.4'/><path d='M8 7.3v4' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'/><circle cx='8' cy='4.9' r='1' fill='black'/></svg>");
+ --icono-tilde:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3.5 8.5l3 3 6-7' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>")}
+:root[data-theme=dark]{--canasta-otra:#9fb8d6}
+.icono-mascara,.panel-comparaciones>summary::before,.ayuda-flujo::before{-webkit-mask:var(--icono-mas) center/contain no-repeat;mask:var(--icono-mas) center/contain no-repeat;background:currentColor}
+
+/* Foco visible en los controles principales (el recorte del selector lo ocultaba) */
+.barra-controles .selector-flujo .lado button:focus-visible,.campo-periodo .atajos button:focus-visible{outline:2px solid var(--foco);outline-offset:-5px}
+.barra-controles .selector-flujo .lado button[aria-pressed=true]:focus-visible{outline-color:var(--sobre-azul)}
+.panel-comparaciones>summary:focus-visible,.soporte-grafico>details>summary:focus-visible,.sensitivity>summary:focus-visible{outline:2px solid var(--foco);outline-offset:2px}
+.stage .canasta .fila:focus-within{box-shadow:none}
+.stage .canasta .fila input:focus-visible{outline:2px solid var(--foco);outline-offset:1px}
+.saltar-grafico{position:absolute;left:16px;top:8px;z-index:200;padding:8px 14px;border-radius:6px;background:var(--azul);color:var(--sobre-azul);font:700 13px var(--tipo);transform:translateY(-200%);transition:transform .15s}
+.saltar-grafico:focus{transform:none}
+
+/* Íconos dibujados en lugar de caracteres: «+», «−» e «i» */
+.panel-comparaciones>summary::before{content:'';width:14px;height:14px;flex:none}
+.panel-comparaciones[open]>summary::before{-webkit-mask-image:var(--icono-menos);mask-image:var(--icono-menos)}
+.ayuda-flujo::before{content:'';width:16px;height:16px;border:0;border-radius:0;-webkit-mask-image:var(--icono-info);mask-image:var(--icono-info)}
+.lista-referencias .rubro-preview{position:relative;padding-right:34px}
+.lista-referencias .rubro-preview[aria-pressed=true]::after{content:'';position:absolute;right:12px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--azul);
+ -webkit-mask:var(--icono-tilde) center/contain no-repeat;mask:var(--icono-tilde) center/contain no-repeat}
+.lista-referencias .rubro-preview:disabled{opacity:.5;cursor:not-allowed}
+
+/* Banda azul noche recta detrás de la cabecera: la diagonal queda solo en la esquina del dólar */
+html:not(.embebido) body:before,:root[data-theme=dark]:not(.embebido) body:before{height:118px;clip-path:none}
+
+/* Cifras: fecha de comparación junto al rótulo, valor, y sentido debajo; nada se corta */
+@media(min-width:1251px){
+ #resumenPrincipal .principal:not(.cifra-dolar){grid-template-columns:auto 1fr;column-gap:10px}
+ #resumenPrincipal .principal:not(.cifra-dolar) .k{grid-column:1;grid-row:1}
+ #resumenPrincipal .principal:not(.cifra-dolar) .n{grid-column:2;grid-row:1;white-space:normal;overflow:visible;font-size:12px;align-self:baseline}
+ #resumenPrincipal .principal:not(.cifra-dolar) .n::before{content:'·';margin-right:8px;color:var(--eje)}
+ #resumenPrincipal .principal:not(.cifra-dolar) .v{grid-column:1 / -1;grid-row:2}
+ #resumenPrincipal .principal:not(.cifra-dolar) .sentido{grid-column:1 / -1;grid-row:3}
+}
+#resumenPrincipal .cifra-dolar .condicional{font-size:11.5px;text-transform:none;letter-spacing:0;opacity:1;font-weight:600}
+#resumenPrincipal .cifra-dolar .cotizacion-resumen{color:rgba(255,255,255,.82)}
+:root[data-theme=dark] #resumenPrincipal .cifra-dolar{background:linear-gradient(150deg,#0c2a52 0%,#13457f 60%,#1a5ca3 100%)}
+
+/* Gráfico: título que nombra flujo y rubro; lectura fijada más angosta */
+.chart-column .gcab h2{font-size:18px;line-height:1.25}
+@media(min-width:901px){.chart-column .tip,.chart-column .tip.con-bcra{width:330px}}
+
+/* Comparaciones: la otra canasta en azul grisáceo; período con el mismo tinte que las demás elecciones secundarias */
+.campo-periodo .atajos button[aria-pressed=true]{box-shadow:none;font-weight:700}
+
+/* Canasta sectorial: aviso de canasta ajustada con «Restablecer»; la lista completa crece sin barra propia */
+.ajuste-canasta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 4px;padding:7px 10px;border-radius:6px;background:var(--seleccion);font-size:12.5px;font-weight:600;color:var(--titulo)}
+.ajuste-canasta[hidden]{display:none}
+.ajuste-canasta button{border:0;background:none;padding:2px 0;font:700 12.5px var(--tipo);color:var(--azul);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.stage>.basket #paises{max-height:none;overflow:visible}
+.titulo-canasta{display:inline;margin:0;font:inherit;color:inherit;letter-spacing:inherit}
+
+/* Canasta propia: resumen de carga fijo abajo, solo en pantallas angostas */
+.resumen-carga{display:none}
+@media(max-width:900px){
+ .resumen-carga:not([hidden]){position:sticky;bottom:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px -16px -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:var(--noche);color:#fff;font:700 14px var(--tipo);box-shadow:0 -10px 24px -14px #0a2a5a99}
+ .resumen-carga button{border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.1);color:#fff;border-radius:6px;min-height:44px;padding:0 16px;font:700 14px var(--tipo)}
+}
+
+/* Tamaños mínimos legibles */
+.chart-column .gcab .et,.rango,.basket .vertodos,.quitar-referencia,.cab-pesos span,.sens,.nota-sensibilidad,.titulo-referencias,.etiqueta-periodo{font-size:12px}
+.sens td,.sens th{font-size:12px}
+
+/* Ancho intermedio (incluye el marco de la web, ~990 px): flujo, rubro y período en una sola fila */
+@media(min-width:901px) and (max-width:1250px){
+ .barra-controles .scope{grid-template-columns:minmax(260px,1.15fr) minmax(170px,.85fr) auto;gap:18px}
+ .campo-periodo{grid-column:auto}
+ .campo-periodo .atajos{max-width:none}
+ .campo-periodo .atajos button{padding:0 10px;font-size:12.5px}
+ #resumenPrincipal .principal{padding:12px 18px}
+ #resumenPrincipal .principal .v{font-size:26px}
+}
+
+/* Celular y tableta */
+@media(min-width:600px) and (max-width:900px){
+ #resumenPrincipal{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #resumenPrincipal .cifra-dolar{grid-column:auto;border-top:0}
+}
+@media(max-width:900px){
+ .cab.compacta .theme{width:44px;height:44px;min-height:44px}
+ #resumenPrincipal .principal{padding:12px 16px 14px}
+ #resumenPrincipal .principal .v{font-size:24px}
+ #resumenPrincipal .principal .sentido{font-size:12px;align-items:flex-start}
+ #resumenPrincipal .principal .sentido::before{margin-top:5px}
+ #resumenPrincipal .cifra-dolar #abrirPromedio{min-height:44px;display:inline-flex;align-items:center}
+ .periodo .slider{margin:0 12px}
+ .basket .acciones{justify-content:flex-start}
+}
+#resumenPrincipal .cifra-dolar .cotizacion-resumen span{display:block}
+#resumenPrincipal .cifra-dolar .cotizacion-resumen span{color:inherit!important;font:inherit;opacity:1}
+@media(min-width:901px) and (max-width:1250px){#resumenPrincipal .cifra-dolar>*{align-self:flex-start}}
+@media(max-width:900px){.periodo .slider{width:auto;align-self:stretch}}
+@media(min-width:901px) and (max-width:1250px){#resumenPrincipal .cifra-dolar>.v,#resumenPrincipal .cifra-dolar>.n{align-self:flex-start}}
+
+/* ===== Tanda 5 (11/10): pendientes y reordenamientos aprobados por Iván ===== */
+
+/* Accesibilidad y contraste */
+html:not(.embebido) .cab.compacta .theme:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#resumenPrincipal .cifra-dolar #abrirPromedio{color:#CFE5FF}
+#resumenPrincipal .cifra-dolar .condicional{color:#CFE5FF;border-color:rgba(207,229,255,.6)}
+#resumenPrincipal .cifra-dolar #abrirPromedio:focus-visible{outline-color:#fff}
+.globo{box-shadow:var(--shadow-tip)}
+
+/* Escala tipográfica de seis tamaños: 12 · 13,5 · 15 · 18 · 24 · 32 */
+.cab.compacta h1,html:not(.embebido) .cab.compacta h1{font-size:24px}
+.franja-modos .modos button,.cab.compacta .franja-modos .modos button{font-size:13.5px}
+.barra-controles .selector-flujo .lado button strong{font-size:15px}
+.barra-controles .selector-flujo .lado button .detalle-flujo{font-size:12px}
+.barra-controles .scope-field select{font-size:15px}
+.campo-periodo .atajos button{font-size:13.5px}
+.chart-column .gcab h2{font-size:18px}
+.stage>.basket>summary{font-size:15px}
+#resumenPrincipal .principal .n,#resumenPrincipal .principal .sentido,.indice-actual,.ayuda-pesos,.stage>.basket .detalle,.basket .vertodos,.ajuste-canasta,
+.ajuste-canasta button,.basket .acciones button,.basket .pais .w,#claves .l,.condicional,#resumenPrincipal .cifra-dolar .condicional,#resumenPrincipal .cifra-dolar .cotizacion-resumen,
+.explicacion-flujo,.franja-modos .sello,.cab-pesos span,.quitar-referencia,.chart-column .gcab .et,.guia-grafico,.guia-grafico button{font-size:12px}
+.basket .pais .n,.stage .canasta .fila .pc,.panel-comparaciones>summary,.soporte-grafico>details>summary,.pestana-consulta,#canastaLista input,.explicacion-flujo strong{font-size:13.5px}
+.stage .canasta .fila .n,.stage .canasta .fila.cero .n,.stage .canasta .fila input{font-size:15px}
+
+/* Jerarquía: el flujo pesa más; el dólar baja un escalón y deja de ser lo primero que mira el ojo */
+.barra-controles .selector-flujo .lado button,.barra-controles .scope-field select,.campo-periodo .atajos{min-height:56px;height:56px}
+@media(min-width:901px){
+ .barra-controles .selector-flujo .lado button{min-height:56px}
+ .barra-controles .scope-field select{height:56px}
+ #resumenPrincipal .principal .v{font-size:32px}
+ #resumenPrincipal .cifra-dolar .v{font-size:24px}
+}
+@media(min-width:901px) and (max-width:1250px){
+ #resumenPrincipal .principal .v,#resumenPrincipal .cifra-dolar .v{font-size:24px}
+}
+@media(max-width:900px){
+ .barra-controles .selector-flujo .lado button,.barra-controles .scope-field select{min-height:52px;height:auto}
+ .barra-controles .scope-field select{height:52px}
+ .campo-periodo .atajos{min-height:44px;height:44px}
+ #resumenPrincipal .principal .v,#resumenPrincipal .cifra-dolar .v{font-size:24px}
+}
+
+/* Período deshabilitado con la canasta propia vacía (no desaparece ni cambia el ancho del bloque) */
+.campo-periodo.inactivo .atajos{opacity:.55}
+.campo-periodo.inactivo .atajos button{cursor:not-allowed}
+.campo-periodo.inactivo .atajos button:hover{background:transparent;color:var(--eje)}
+.campo-periodo.inactivo .atajos button[aria-pressed=true]{color:var(--eje);background:transparent}
+.campo-periodo.inactivo .etiqueta-periodo{color:var(--eje)}
+
+/* Cabecera del gráfico: título y leyenda arriba; índice, diferencia y guía en la segunda fila */
+.chart-column .gcab,.chart-column>.caja>.gcab{display:block;margin-bottom:4px}
+.chart-column .gcab>div.gcab-fila{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:4px 16px;flex-wrap:wrap}
+.gcab-titulo h2{margin:0}
+.gcab-titulo .claves{flex:0 1 auto;margin:0;padding:0;border:0;justify-content:flex-end;gap:6px 16px}
+.gcab-titulo #claves{justify-content:flex-end}
+.chart-column .gcab>div.gcab-meta{align-items:baseline;margin-top:2px}
+.gcab-indice{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;min-width:0}
+.gcab-indice .indice-actual{margin:0}
+.gcab-guia{display:flex;align-items:baseline;justify-content:flex-end;flex-wrap:wrap;gap:2px 14px;text-align:right;margin-left:auto}
+.gcab-guia #granTxt{margin:0!important}
+.gcab-guia .guia-grafico{margin:0}
+.gcab-indice .comparacion-actual{margin:0;padding:0;border:0}
+.gcab-indice .comparacion-resultado{display:inline-flex;align-items:baseline;flex-wrap:nowrap;gap:6px;padding:2px 10px;border-radius:999px;background:var(--seleccion);font-size:12px;line-height:1.5;color:var(--titulo)}
+.gcab-indice .comparacion-resultado strong{font-family:var(--titulos);font-size:13.5px;font-weight:600;letter-spacing:0}
+.gcab-indice .comparacion-fecha{margin:0;font-size:12px;color:var(--eje)}
+.gcab-indice .comparacion-fecha::before{content:'· ';}
+@media(min-width:901px){.chart-column canvas{height:clamp(220px,calc(100svh - 540px),460px)}}
+html.embebido .chart-column canvas{height:400px}
+@media(max-width:900px){
+ .gcab-titulo .claves{flex:1 1 100%;justify-content:space-between}
+ .gcab-guia{margin-left:0;justify-content:flex-start;text-align:left}
+ .gcab-indice .comparacion-resultado{flex-wrap:wrap}
+}
+
+/* Barra del período: serie completa de fondo, años en los extremos y manijas propias */
+.chart-column .periodo .slider{height:26px}
+.slider .mini-serie{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.55}
+.slider .riel,.slider .activo{top:auto;bottom:2px;height:2px}
+.slider input{top:auto;bottom:-5px;z-index:2}
+.slider input::-webkit-slider-thumb{opacity:0}
+.slider input::-moz-range-thumb{opacity:0}
+.slider .manija{position:absolute;bottom:-4px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--panel);border:2px solid var(--azul);box-shadow:0 1px 3px #12212f33;pointer-events:none;z-index:1;transition:transform .15s}
+.slider:hover .manija,.slider:focus-within .manija{transform:scale(1.12)}
+.slider input:focus-visible{outline:none}
+.slider:has(#s0:focus-visible) .manija-a,.slider:has(#s1:focus-visible) .manija-b{box-shadow:0 0 0 3px var(--panel),0 0 0 5px var(--foco)}
+.periodo .anio-extremo{flex:none;font-size:12px;color:var(--eje);font-variant-numeric:tabular-nums;align-self:flex-end;line-height:1;padding-bottom:1px}
+.chart-column .periodo{display:flex;align-items:flex-end;gap:10px}
+.periodo .slider{order:0;margin:0 6px}
+.periodo .anio-extremo:first-child{order:-1}
+.periodo #rangoTxt{order:3;margin-left:8px;align-self:flex-end;line-height:1.2}
+@media(max-width:900px){
+ .chart-column .periodo{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:end;gap:8px 8px}
+ .periodo #rangoTxt{grid-column:1 / -1;grid-row:1;margin:0}
+ .periodo .slider{grid-column:2;grid-row:2;margin:0 6px;width:auto}
+ .periodo .anio-extremo{grid-row:2}
+}
+
+/* Canasta sectorial: rubro y descripción arriba, antes de la composición y la lista */
+.stage>.basket .basket-body>#detalle:first-child{border-top:0;border-bottom:1px solid var(--regla);padding:2px 0 10px;margin:0 0 10px}
+
+/* Consultas al pie: pestañas de ancho completo */
+.soporte-grafico{display:block}
+.pestanas-consulta{display:flex;gap:0;border-top:1px solid var(--regla);margin:0 -24px;padding:0 24px}
+.pestana-consulta{position:relative;display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 4px;margin-right:28px;border:0;background:none;
+ font:600 13.5px var(--tipo);color:var(--cuerpo);cursor:pointer}
+.pestana-consulta::before{content:'';width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s;flex:none}
+.pestana-consulta[aria-expanded=true]::before{transform:rotate(-135deg) translate(-1px,-1px)}
+.pestana-consulta::after{content:'';position:absolute;left:0;right:0;top:-1px;height:2px;background:var(--azul);transform:scaleX(0);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.pestana-consulta[aria-expanded=true]{color:var(--titulo)}
+.pestana-consulta[aria-expanded=true]::after{transform:scaleX(1)}
+.pestana-consulta:hover{color:var(--azul)}
+.pestana-consulta:focus-visible{outline:2px solid var(--foco);outline-offset:-2px}
+.pestana-consulta[hidden]{display:none}
+.soporte-grafico>#consultaMetodo>summary{display:none}
+.soporte-grafico>#consultaMetodo{border:0;margin:0;padding:0}
+.soporte-grafico>#consultaMetodo[open]{padding:4px 0 8px}
+@media(max-width:900px){.pestanas-consulta{margin:0 -16px;padding:0 16px;flex-wrap:wrap}.pestana-consulta{margin-right:20px;text-align:left}}
+
+/* Dólar equivalente: panel anclado debajo de su cifra */
+.stage{position:relative}
+#consultaEquivalencia.panel-anclado:not([open]){display:none}
+#consultaEquivalencia.panel-anclado{margin:0;padding:0;border:0;background:var(--panel)}
+#consultaEquivalencia.panel-anclado>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;
+ font:600 13.5px var(--tipo);color:var(--sobre-azul);background:var(--noche);cursor:pointer}
+#consultaEquivalencia.panel-anclado>summary::-webkit-details-marker{display:none}
+#consultaEquivalencia.panel-anclado>summary::after{content:'';flex:none;width:14px;height:14px;background:currentColor;
+ -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 4l8 8M12 4l-8 8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>") center/contain no-repeat;
+ mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 4l8 8M12 4l-8 8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>") center/contain no-repeat}
+:root[data-theme=dark] #consultaEquivalencia.panel-anclado>summary{color:#fff}
+#consultaEquivalencia.panel-anclado>summary:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+#consultaEquivalencia.panel-anclado .columna-equivalencia{border-radius:0}
+@media(min-width:901px){
+ #consultaEquivalencia.panel-anclado{grid-column:1 / -1;grid-row:2;justify-self:end;align-self:start;width:calc(100% / 3);z-index:30;
+  max-height:min(560px,calc(100svh - 120px));overflow:auto;border:1px solid var(--regla);border-top:0;border-radius:0 0 var(--radio) var(--radio);
+  box-shadow:var(--shadow-tip)}
+ .propia-cierre:not(.sin-pesos) #consultaEquivalencia.panel-anclado{grid-row:2}
+}
+@media(min-width:901px) and (max-width:1250px){#consultaEquivalencia.panel-anclado{width:min(460px,100%)}}
+
+/* Canasta propia vacía: los países a todo el ancho; el gráfico aparece con el primer país */
+.guia-grilla{display:none}
+@media(min-width:901px){
+ .stage.propia-grilla{grid-template-columns:minmax(0,1fr)}
+ .stage.propia-grilla>#resumenPrincipal,.stage.propia-grilla>.chart-column,.stage.propia-grilla>#consultaEquivalencia{display:none}
+ .stage.propia-grilla>.basket{grid-column:1 / -1;grid-row:1;border-left:0}
+ .stage.propia-grilla>.basket>summary{padding:20px 24px 4px}
+ .stage.propia-grilla>.basket .basket-body{padding:0 24px 20px}
+ .propia-grilla .guia-grilla{display:flex;flex-direction:column;gap:2px;margin:4px 0 10px}
+ .propia-grilla .guia-grilla strong{font-family:var(--titulos);font-size:18px;font-weight:600;color:var(--titulo);letter-spacing:-.02em}
+ .propia-grilla .guia-grilla span{font-size:13.5px;color:var(--cuerpo)}
+ .propia-grilla .ayuda-pesos{max-width:720px;margin:0 0 14px}
+ .propia-grilla .cab-pesos{display:none}
+ .stage.propia-grilla .canasta,.stage.propia-grilla #canastaLista{max-height:none;overflow:visible}
+ .propia-grilla #canastaLista{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:28px;row-gap:0}
+ .propia-grilla #canastaLista .fila{margin:0;padding:6px 8px 7px}
+ .propia-grilla .suma{max-width:calc(25% - 21px);margin-left:auto}
+ .propia-grilla .basket .acciones{justify-content:flex-end}
+}
+@media(min-width:901px) and (max-width:1250px){.propia-grilla #canastaLista{grid-template-columns:repeat(3,minmax(0,1fr))}.propia-grilla .suma{max-width:calc(33.3% - 19px)}}
+
+/* Celular: el gráfico antes de las cifras; la canasta propia sigue primero para cargar países */
+@media(max-width:900px){
+ .stage{display:grid;grid-template-columns:minmax(0,1fr)}
+ .stage>.chart-column{display:contents}
+ .stage>.chart-column>.caja{order:1;background:var(--panel)}
+ .stage>#resumenPrincipal{order:2;border-top:1px solid var(--regla)}
+ .stage>#consultaEquivalencia{order:3}
+ .stage>.chart-column>.lecturas-secundarias{order:4}
+ .stage>.chart-column>.soporte-grafico{order:5;background:var(--panel)}
+ .stage>.basket{order:6}
+ .stage.propia-cierre>.basket{order:0;grid-row:auto}
+ .stage.propia-cierre>#resumenPrincipal,.stage.propia-cierre>.chart-column{grid-row:auto}
+}
+/* «Todo» en la canasta propia: sin rubro, el período conserva su columna y no se parte en dos líneas */
+.campo-periodo .atajos{flex-wrap:nowrap}
+@media(min-width:901px){.barra-controles .scope>.campo-periodo{grid-column:3}}
+.propia-grilla .basket .acciones{display:flex;justify-content:flex-end}
+.propia-grilla .basket .acciones #bBorrar{width:auto;flex:none}
+@media(max-width:900px){
+ /* filas automáticas: el orden lo da «order» (gráfico, cifras, consulta, pie, canasta) */
+ .stage>#resumenPrincipal,.stage>.basket,.stage>#consultaEquivalencia,.stage>.chart-column>*{grid-row:auto!important;grid-column:1 / -1}
+ .gcab-titulo .claves,.gcab-titulo #claves{justify-content:flex-start}
+}
+/* el riel del período no toma el alto del gráfico principal */
+.chart-column .periodo .slider canvas.mini-serie,html.embebido .chart-column .periodo .slider canvas.mini-serie{height:100%!important;width:100%!important}
+
+/* «Agregar comparación» está arriba del gráfico: el panel abre hacia abajo, sobre la curva */
+.gcab-titulo .contenido-comparaciones{top:calc(100% + 6px);bottom:auto;max-height:min(70svh,560px);overflow:auto;overflow-x:hidden;box-shadow:var(--shadow-tip)}
+.gcab-titulo .panel-comparaciones{position:relative}
+/* Escala tipográfica: los últimos tamaños fuera de la escala (11, 11,5, 13, 14 y 30 px) */
+#app #granTxt,#app #rangoTxt,#app #bVerTodos,#app #bBorrar,#app .view-note,#app .sens caption,#app .sens small,#app .periodo .anio-extremo{font-size:12px}
+#app .saltar-grafico,#app .rubro-preview strong,#app .columna-equivalencia #cajaDolar>.pregunta-equivalencia{font-size:13.5px}
+#app .columna-equivalencia .dol-b .v,#app #dolar .dol-b .v{font-size:24px}
+#app #bTodos,#app #bNinguno{font-size:12px}
+#app .ayuda-lectura .lectura{font-size:13.5px}
+/* las manijas en los extremos no tapan los años */
+.chart-column .periodo .slider{margin:0 12px}
+@media(max-width:900px){.chart-column .periodo .slider{margin:0 12px}}
+
+/* ===== Tanda 6 (11/10): ajustes pedidos por Iván sobre la tanda 5 ===== */
+
+/* Controles más planos: una línea por control; el gráfico gana alto y queda menos apaisado */
+@media(min-width:901px){
+ .barra-controles .scope{padding:10px 24px 12px;row-gap:0}
+ .titulo-flujo{margin-bottom:4px}
+ .barra-controles .scope-field{gap:4px}
+ .campo-periodo{gap:4px}
+ .barra-controles .selector-flujo .lado button,.barra-controles .scope-field select,.campo-periodo .atajos{min-height:44px;height:44px}
+ .barra-controles .selector-flujo .lado button{padding-top:0;padding-bottom:0}
+ .barra-controles .selector-flujo .lado button .detalle-flujo{display:none}
+ #resumenPrincipal .principal{padding-top:10px;padding-bottom:12px}
+ .chart-column canvas{height:clamp(200px,calc(100svh - 500px),520px)}
+}
+
+/* Dólar equivalente: sin repetir la cifra de arriba; la cuenta a la vista */
+#consultaEquivalencia .pregunta-equivalencia,#consultaEquivalencia #dolar .dol{display:none}
+.explicacion-dolar{margin:4px 0 14px;font-size:13.5px;line-height:1.55;color:var(--cuerpo)}
+.explicacion-dolar p{margin:0 0 10px}
+.explicacion-dolar .explicacion-titulo{font-family:var(--titulos);font-size:15px;font-weight:600;color:var(--titulo);margin-bottom:6px}
+.cuenta-dolar{width:100%;border-collapse:collapse;margin:2px 0 12px;font-size:13.5px;font-variant-numeric:tabular-nums}
+.cuenta-dolar th{text-align:left;font-weight:500;color:var(--cuerpo);padding:6px 0;border-bottom:1px solid var(--grilla)}
+.cuenta-dolar td{text-align:right;font-weight:700;color:var(--titulo);padding:6px 0 6px 12px;border-bottom:1px solid var(--grilla);white-space:nowrap}
+.cuenta-dolar tr.total th{font-weight:600;color:var(--eje);font-size:12px;border-bottom:0;padding-top:8px}
+.cuenta-dolar tr.total td{font-family:var(--titulos);font-size:18px;font-weight:600;color:var(--azul);border-bottom:0;padding-top:8px}
+
+/* Barra del período: una ventana sobre la serie completa, con asas laterales, en lugar de dos puntos y una línea */
+.chart-column .periodo .slider{height:30px}
+.slider .riel{top:auto;bottom:0;height:1px;background:var(--regla)}
+.slider .activo{top:0;bottom:0;height:auto;background:color-mix(in srgb,var(--azul) 10%,transparent);border-top:1.5px solid var(--azul);border-bottom:1.5px solid var(--azul);border-radius:3px;transition:none}
+.slider .mini-serie{opacity:1}
+.slider input{top:0;bottom:auto;height:100%}
+.slider input::-webkit-slider-thumb{height:30px;width:14px;cursor:ew-resize}
+.slider input::-moz-range-thumb{height:30px;width:14px;cursor:ew-resize}
+.slider .manija{top:0;bottom:auto;width:10px;height:30px;margin-left:-5px;border-radius:3px;border:0;background:var(--azul);box-shadow:none}
+.slider .manija::before{content:'';position:absolute;left:50%;top:50%;width:2px;height:10px;margin:-5px 0 0 -1px;border-radius:1px;background:var(--sobre-azul);opacity:.85}
+.slider:hover .manija,.slider:focus-within .manija{transform:none}
+.slider .manija-a{border-radius:3px 0 0 3px;margin-left:-10px}
+.slider .manija-b{border-radius:0 3px 3px 0;margin-left:0}
+.slider:has(#s0:focus-visible) .manija-a,.slider:has(#s1:focus-visible) .manija-b{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--foco)}
+.periodo .anio-extremo{padding-bottom:9px}
+
+/* Lectura del gráfico más compacta */
+@media(min-width:901px){.chart-column .tip,.chart-column .tip.con-bcra{width:280px}}
+.chart-column .tip{padding:10px 12px}
+.tip .f{font-size:13.5px;margin-bottom:4px}
+.tip.una-serie .tabla-tooltip thead,.tip.una-serie .tabla-tooltip td:last-child{display:none}
+.tip .tabla-tooltip{font-size:12px}
+.tip .equivalente-tip{margin-top:6px;padding-top:6px}
+.tip .equivalente-tip b{font-size:15px}
+.tip:not(.fijado) .tip-supuestos{display:none}
+.tip.una-serie .tabla-tooltip{width:100%}
+.tip.una-serie .tabla-tooltip th{white-space:nowrap;padding-right:12px}
+
+/* ===== Tanda 7 (11/10): «¿Qué mide y para qué sirve?» y etapas cambiarias ===== */
+
+/* Enlace en la franja superior y panel de lectura rápida */
+.franja-modos{align-items:center}
+.franja-modos .modos{align-self:flex-end}
+.enlace-que-mide{display:inline-flex;align-items:center;gap:6px;margin-left:auto;padding:6px 0;border:0;background:none;font:600 12px var(--tipo);color:var(--azul);cursor:pointer}
+.enlace-que-mide::before{content:'';width:16px;height:16px;flex:none;background:currentColor;-webkit-mask:var(--icono-info) center/contain no-repeat;mask:var(--icono-info) center/contain no-repeat}
+.enlace-que-mide:hover{text-decoration:underline;text-underline-offset:3px}
+.enlace-que-mide[aria-expanded=true]{color:var(--titulo)}
+.franja-modos .sello{margin-left:20px}
+.que-mide{position:relative;display:grid;grid-template-columns:1.1fr 1.25fr 1fr;gap:20px 32px;padding:18px 56px 18px 24px;background:var(--seleccion);border-bottom:1px solid var(--regla)}
+.que-mide[hidden]{display:none}
+.que-mide-bloque h2{margin:0 0 6px;font-family:var(--titulos);font-size:15px;font-weight:600;color:var(--titulo);letter-spacing:-.01em}
+.que-mide-bloque p,.que-mide-bloque li{margin:0 0 6px;font-size:13.5px;line-height:1.5;color:var(--cuerpo)}
+.que-mide-bloque ul{margin:0;padding-left:18px}
+.que-mide-bloque li::marker{color:var(--azul)}
+.que-mide-formula{display:inline-block;padding:4px 10px;border-radius:6px;background:var(--panel);font-weight:600;color:var(--titulo)!important;font-size:12px!important}
+.que-mide-alcance{font-size:12px!important;color:var(--eje)!important}
+.que-mide-cerrar{position:absolute;top:12px;right:14px;width:32px;height:32px;border:0;border-radius:6px;background:none;color:var(--eje);cursor:pointer}
+.que-mide-cerrar::before{content:'';position:absolute;inset:9px;background:currentColor;
+ -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 4l8 8M12 4l-8 8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>") center/contain no-repeat;
+ mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 4l8 8M12 4l-8 8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>") center/contain no-repeat}
+.que-mide-cerrar:hover{color:var(--azul);background:var(--panel)}
+@media(max-width:900px){
+ .enlace-que-mide{margin-left:0;order:3;width:100%;padding:0 0 10px}
+ .franja-modos .sello{margin-left:0}
+ .que-mide{grid-template-columns:minmax(0,1fr);gap:14px;padding:16px 48px 16px 16px}
+}
+
+/* Selector de etapas cambiarias */
+.boton-etapas{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:7px 12px;border:1px solid var(--regla);border-radius:var(--radio-control);background:transparent;
+ font:600 13.5px var(--tipo);color:var(--cuerpo);cursor:pointer;white-space:nowrap}
+.boton-etapas::before{content:'';width:12px;height:12px;border-radius:2px;border:1.5px solid currentColor;background:linear-gradient(90deg,currentColor 0 33%,transparent 33% 66%,currentColor 66%);opacity:.7}
+.boton-etapas:hover{border-color:var(--azul);color:var(--azul)}
+.boton-etapas[aria-pressed=true]{border-color:var(--azul);background:var(--seleccion);color:var(--azul)}
+.boton-etapas:focus-visible{outline:2px solid var(--foco);outline-offset:2px}
+.boton-etapas[hidden]{display:none}
+@media(max-width:900px){.boton-etapas{min-height:44px}}
+
+/* Etapa en la lectura del punto */
+.tip .etapa-tip{margin:6px 0 0;padding-top:6px;border-top:1px solid var(--grilla);font-size:12px;color:var(--eje)}
+.tip .etapa-tip b{color:var(--titulo);font-weight:700}
+
+/* Ficha de una etapa */
+.ficha-etapa{position:absolute;z-index:40;width:min(340px,calc(100% - 8px));padding:14px 40px 12px 16px;border:1px solid var(--regla);border-radius:8px;background:var(--panel);box-shadow:var(--shadow-tip);font-size:13.5px;line-height:1.5;color:var(--cuerpo)}
+.ficha-etapa p{margin:0 0 8px}
+.ficha-etapa .ficha-titulo{margin:0;font-family:var(--titulos);font-size:15px;font-weight:600;color:var(--titulo)}
+.ficha-etapa .ficha-periodo{font-size:12px;color:var(--eje)}
+.ficha-etapa ul{margin:0 0 8px;padding-left:18px;font-size:12px}
+.ficha-etapa a{color:var(--azul)}
+.ficha-etapa .ficha-fuente{font-size:12px;font-weight:600}
+.ficha-etapa .ficha-nota{margin:8px 0 0;font-size:12px;color:var(--eje)}
+.ficha-cerrar{position:absolute;top:8px;right:8px;width:28px;height:28px;border:0;border-radius:6px;background:none;color:var(--eje);cursor:pointer}
+.ficha-cerrar::before{content:'';position:absolute;inset:8px;background:currentColor;
+ -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 4l8 8M12 4l-8 8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>") center/contain no-repeat;
+ mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 4l8 8M12 4l-8 8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/></svg>") center/contain no-repeat}
+.ficha-cerrar:hover{color:var(--azul);background:var(--seleccion)}
+
+/* Lista de etapas en la metodología */
+.lista-etapas ul{margin:0 0 10px;padding-left:18px;font-size:13.5px;line-height:1.55;color:var(--cuerpo);max-width:90ch}
+.lista-etapas li{margin-bottom:6px}
+.lista-etapas a{color:var(--azul)}
+.ficha-etapa{z-index:60}

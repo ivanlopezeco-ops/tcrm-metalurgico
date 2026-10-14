@@ -4,7 +4,7 @@ const read=f=>fs.readFileSync(at(f),'utf8').replace(/\r\n/g,'\n');
 const base=read('base.html');
 if(hash(base)!=='3bae0e7d3e06ab72d9ae27ad28265eb085c8bd6e6a57b52e3fac582305fcc025')throw Error('Cambió la base congelada');
 const scripts=[...base.matchAll(/<script>([\s\S]*?)<\/script>/g)],old=scripts.at(-1)[1];
-let app=old.replace("$('#mSector').onclick=",read('v9.js')+'\n'+read('canastas.js')+'\n'+read('cierre.js')+'\n'+read('editorial.js').replace('__LOGO_ADIMRA__',fs.readFileSync(at('assets/logo-adimra.png')).toString('base64')).replace('__LOGO_ESTUDIOS__',fs.readFileSync(at('assets/logo-estudios-economicos.png')).toString('base64'))+'\n'+read('interacciones.js')+'\n'+read('ubicacion.js')+"\n$('#mSector').onclick=");
+let app=old.replace("$('#mSector').onclick=",read('v9.js')+'\n'+read('canastas.js')+'\n'+read('cierre.js')+'\n'+read('editorial.js').replace('__LOGO_ADIMRA__',fs.readFileSync(at('assets/logo-adimra.png')).toString('base64')).replace('__LOGO_ESTUDIOS__',fs.readFileSync(at('assets/logo-estudios-economicos.png')).toString('base64'))+'\n'+read('interacciones.js')+'\n'+read('ubicacion.js')+'\n'+read('v15.js')+"\n$('#mSector').onclick=");
 const hook="  if(modo==='sector'){\n    const T=TEXTO_LADO[lado];";
 if(!app.includes(hook))throw Error('Falta punto de comparación de canastas');
 app=app.replace(hook,"  agregarCanastaContraparte();\n"+hook)
@@ -14,11 +14,18 @@ if(app.includes("$('#bProm')"))throw Error('Quedó un enlace al control eliminad
 app=app.replace('lineas.push({y:rc,c:NARANJA,w:3.6,et:comparar});','if(compararPropiaV9) lineas.push({y:rc,c:NARANJA,w:3.6,et:comparar});');
 app=app.replace('  sincronizarSlider();\n  dibujar();','  if(modo===\'empresa\'&&!norm(canastas[lado]))lineas=[];\n  sincronizarSlider();\n  dibujar();');
 app=app.replace("$('#bBorrar').onclick=()=>{deshacerCanasta", "$('#bBorrar').onclick=()=>{compararPropiaV9=false;comparadorActual='ninguno';verBCRA=false;deshacerCanasta");
-app=app.replace(/<p class="view-note">[\s\S]*?<\/p>/,'<p class="view-note">Atlas v14 · ADIMRA</p>');
+app=app.replace(/<p class="view-note">[\s\S]*?<\/p>/,'<p class="view-note">Atlas v15 · ADIMRA</p>');
 new vm.Script(app);
-const html=base.replace(old,app).replace('</style>',read('v9.css')+'\n'+read('editorial.css').replace('__POPPINS_600__',fs.readFileSync(at('assets/Poppins-SemiBold.ttf')).toString('base64'))+'\n'+read('profundidad.css')+'\n'+read('interacciones.css')+'\n'+read('ubicacion.css')+'\n'+read('logos.css')+'\n</style>')
- .replace('<title>TCRM · Atlas v8 · ADIMRA</title>','<title>TCRM · Atlas v14 · ADIMRA</title>')
- .replace(/<p class="view-note">[\s\S]*?<\/p>/,'<p class="view-note">Atlas v14 · ADIMRA</p>');
+// ícono de la pestaña: azul noche con la curva del índice (evita el 404 de favicon.ico)
+const FAVICON='<link rel="icon" href="data:image/svg+xml,'+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='#0A3F86'/><path d='M6 21l5-6 5 4 5-9 5 5' fill='none' stroke='#fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/></svg>")+'">';
+const html=base.replace(old,app).replace('</style>',read('v9.css')+'\n'+read('editorial.css').replace('__POPPINS_600__',fs.readFileSync(at('assets/Poppins-SemiBold.ttf')).toString('base64'))+'\n'+read('profundidad.css')+'\n'+read('interacciones.css')+'\n'+read('ubicacion.css')+'\n'+read('logos.css')+'\n'+read('v15.css')+'\n</style>')
+ .replace('<title>TCRM · Atlas v8 · ADIMRA</title>','<title>TCRM · Atlas v15 · ADIMRA</title>')
+ .replace(/<p class="view-note">[\s\S]*?<\/p>/,'<p class="view-note">Atlas v15 · ADIMRA</p>')
+ // tablero exclusivo de la web: pedir a los buscadores que no lo indexen
+ .replace('<meta name="viewport" content="width=device-width,initial-scale=1">','<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex, nofollow">'+FAVICON)
+ .replace("localStorage.getItem('tcrm-atlas-theme')||","(t=>t==='dark'||t==='light'?t:null)(new URLSearchParams(location.search).get('tema'))||localStorage.getItem('tcrm-atlas-theme')||");
+if(!html.includes("get('tema')"))throw Error('Falta el tema por parámetro');
+if(!html.includes('name="robots"'))throw Error('Falta la etiqueta noindex');
 const partes=html.split('__TCRM_DATOS__');
 if(partes.length!==2)throw Error('Falta el punto de inserción de datos');
 const cuerpo=partes[1].replace(/^;<\/script>\s*/, '');
@@ -28,4 +35,4 @@ for(const [archivo,contenido] of destinos){
   if(fs.readFileSync(at(archivo),'utf8')!==contenido)throw Error('Regenerar '+archivo);
  }else fs.writeFileSync(at(archivo),contenido);
 }
-console.log('Plantillas Atlas v14: OK. Los datos se insertan desde Python.');
+console.log('Plantillas Atlas v15: OK. Los datos se insertan desde Python.');
