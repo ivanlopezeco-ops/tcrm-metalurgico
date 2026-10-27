@@ -61,7 +61,7 @@ SALIDA = BASE / "salida"
 PUBLICO = BASE / "publico"
 REGISTRO = SALIDA / "registro.txt"
 
-URL_BCRA_XLSX = "https://www.bcra.gob.ar/archivos/Pdfs/PublicacionesEstadisticas/ITCRMSerie.xlsx"
+URL_BCRA_XLSX = "https://www.bcra.gob.ar/archivos/Pdfs/PublicacionesEstadisticas/itcrm-serie.xlsx"
 URL_BIS = {
     "cpi": "https://data.bis.org/static/bulk/WS_LONG_CPI_csv_flat.zip",
     "xru": "https://data.bis.org/static/bulk/WS_XRU_csv_flat.zip",
