@@ -1073,3 +1073,13 @@ $('#vista').addEventListener('pointerup', e => {
  const cv = e.target.closest?.('#lienzo'); if (!cv || typeof cv.onclick !== 'function') return;
  cv.onclick();
 });
+
+// La franja del selector activo se mide en píxeles. Si un selector cambia de ancho sin que cambie
+// la ventana (fuentes, logos o columnas que terminan de acomodarse), se vuelve a medir.
+const vigiaSelectoresV15 = typeof ResizeObserver === 'function' ? new ResizeObserver(() => actualizarSelectoresMovimiento(false)) : null;
+const selectoresAntesV15 = actualizarSelectoresMovimiento;
+actualizarSelectoresMovimiento = function(animar = true) {
+ selectoresAntesV15(animar);
+ document.querySelectorAll('.seleccion-deslizante').forEach(g => vigiaSelectoresV15?.observe(g));
+};
+actualizarSelectoresMovimiento(false);
