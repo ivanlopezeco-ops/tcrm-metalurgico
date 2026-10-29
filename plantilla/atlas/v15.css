@@ -820,3 +820,65 @@ html.embebido .chart-column canvas{height:400px}
 .lista-etapas li{margin-bottom:6px}
 .lista-etapas a{color:var(--azul)}
 .ficha-etapa{z-index:60}
+
+/* ===== Tanda 8 (29/10): cifras que ruedan, casillas, dólar que sigue al cursor, botones y color ===== */
+/* Prueba local, tanda 1: cifras que ruedan y casillas que se dibujan */
+.rueda-v16{display:inline-block;overflow:hidden;vertical-align:bottom}
+.pista-v16{display:inline-block;position:relative;animation-fill-mode:both;
+  animation-timing-function:cubic-bezier(.25,1.15,.5,1)}
+.pista-v16::before{content:attr(data-antes);position:absolute;left:0;right:0;text-align:center}
+/* la celda del dólar tiñe y, en pantallas angostas, oculta sus span: los dígitos conservan el color de la cifra */
+#resumenPrincipal .rueda-v16,#resumenPrincipal .pista-v16{display:inline-block!important;color:inherit!important;font:inherit}
+.pista-v16.sube{animation-name:ruedaSubeV16}
+.pista-v16.sube::before{bottom:100%}
+.pista-v16.baja{animation-name:ruedaBajaV16}
+.pista-v16.baja::before{top:100%}
+@keyframes ruedaSubeV16{from{transform:translateY(100%)}to{transform:none}}
+@keyframes ruedaBajaV16{from{transform:translateY(-100%)}to{transform:none}}
+
+.pais input.trazo-v16{animation:cajaV16 .32s cubic-bezier(.2,.8,.2,1)}
+.pais input.trazo-v16::after{animation:tildeV16 .3s cubic-bezier(.4,0,.2,1) both}
+@keyframes cajaV16{0%{scale:.9}55%{scale:1.06}100%{scale:1}}
+/* el tilde es un ángulo girado: primero se ve el trazo corto y después sube el largo */
+@keyframes tildeV16{0%{clip-path:inset(65% 100% 0 0)}40%{clip-path:inset(65% 0 0 0)}100%{clip-path:inset(0 0 0 0)}}
+
+@media (prefers-reduced-motion:reduce){
+  .pista-v16,.pais input.trazo-v16,.pais input.trazo-v16::after{animation:none}
+  .pista-v16::before{content:none}
+}
+/* Tanda 2: la referencia de la celda del dólar cambia de tono mientras sigue al cursor */
+#resumenPrincipal .cifra-dolar.sigue-cursor .n:not(.cotizacion-resumen){color:#A9D4FF}
+#tip.sin-dolar .equivalente-tip,#tip.sin-dolar .tip-supuestos{display:none}
+/* Prueba local, tanda 3: botones, casillas y color. Va después de las tandas 1 y 2. */
+
+/* 1. Flujo con el mismo formato que el período: fondo claro y texto azul en la opción elegida.
+      Así la celda del dólar queda como la única superficie azul fuerte dentro del tablero. */
+.barra-controles .selector-flujo .selection-marker{background:var(--seleccion)}
+.barra-controles .selector-flujo .lado button[aria-pressed=true],
+.barra-controles .selector-flujo .lado button[aria-pressed=true] strong{color:var(--azul)}
+.barra-controles .selector-flujo .lado button[aria-pressed=true] .detalle-flujo{color:var(--azul);opacity:.8}
+.barra-controles .selector-flujo .lado button[aria-pressed=true]:focus-visible{outline-color:var(--foco)}
+.barra-controles .selector-flujo .lado button strong{font-weight:600}
+.barra-controles .selector-flujo .lado button[aria-pressed=true] strong{font-weight:700}
+
+/* 2. Acciones del gráfico como botones de texto con su ícono, sin caja */
+.gcab-titulo .boton-etapas,
+.gcab-titulo .panel-comparaciones>summary,
+:root[data-theme=dark] .gcab-titulo .panel-comparaciones>summary{
+  border:0;background:transparent;color:var(--azul);min-height:30px;padding:5px 8px;border-radius:6px;font-weight:600}
+.gcab-titulo .boton-etapas:hover,
+.gcab-titulo .panel-comparaciones>summary:hover{background:var(--seleccion);color:var(--azul)}
+.gcab-titulo .boton-etapas[aria-pressed=true]{background:var(--seleccion);color:var(--azul)}
+.gcab-titulo .panel-comparaciones[open]>summary{background:var(--seleccion)}
+.gcab-titulo .boton-etapas::before{opacity:1}
+@media (max-width:900px){
+  .gcab-titulo .boton-etapas,.gcab-titulo .panel-comparaciones>summary{min-height:44px}
+}
+
+/* 3. Casillas de la canasta: contorno fino y tilde azul; el país desmarcado se apaga en toda la fila */
+.basket .pais input:checked,
+:root[data-theme=dark] .basket .pais input:checked{background:var(--panel);border-color:var(--azul)}
+.basket .pais input:checked::after,
+:root[data-theme=dark] .basket .pais input:checked::after{border-color:var(--azul)}
+.basket .pais input:not(:checked){border-color:var(--regla)}
+.basket .pais.off .n,.basket .pais.off .w{color:color-mix(in srgb,var(--pie) 78%,var(--panel))}

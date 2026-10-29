@@ -45,7 +45,8 @@ function mostrarAyudaFlujoV13(ancla, flujo, fijar = false) {
  if (anclaAyudaV13?.matches('.ayuda-flujo')) anclaAyudaV13.setAttribute('aria-expanded', 'false');
  anclaAyudaV13 = ancla; ayudaFijadaV13 = fijar; ayudaFlujoV13.hidden = false;
  if (ancla.matches('.ayuda-flujo')) ancla.setAttribute('aria-expanded', 'true');
- const r = ancla.getBoundingClientRect(), a = ayudaFlujoV13.getBoundingClientRect();
+ // tamaño sin transformaciones: si la ayuda se está abriendo con escala, el rectángulo visible es más chico
+ const r = ancla.getBoundingClientRect(), a = {width: ayudaFlujoV13.offsetWidth, height: ayudaFlujoV13.offsetHeight};
  const x = Math.max(12, Math.min(innerWidth - a.width - 12, r.left));
  const y = r.bottom + a.height + 8 <= innerHeight - 12 ? r.bottom + 8 : Math.max(12, r.top - a.height - 8);
  ayudaFlujoV13.style.left = x + 'px'; ayudaFlujoV13.style.top = y + 'px';

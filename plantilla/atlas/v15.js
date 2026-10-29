@@ -1083,3 +1083,234 @@ actualizarSelectoresMovimiento = function(animar = true) {
  document.querySelectorAll('.seleccion-deslizante').forEach(g => vigiaSelectoresV15?.observe(g));
 };
 actualizarSelectoresMovimiento(false);
+
+// ===== Tanda 8 (29/10): transición de la curva, cifras que ruedan, casillas, paneles, dólar que sigue al cursor y retoques de color, probados en tcrm-transicion-easyui y aprobados por Iván =====
+// La transición reemplaza al fundido de la tanda 4 (redefine dibujar); el bloque anterior queda como base.
+// Prueba local: transición de la curva tomada del Interactive Area Chart de EasyUI (MIT).
+// Dos cambios sobre la v15:
+// 1. Al cambiar el período, las series se remuestrean a la cantidad de fechas nuevas
+//    (spline de Catmull-Rom) y se transforman en lugar de fundirse.
+// 2. Si llega otro cambio a mitad de camino, la transición parte de lo que está en pantalla.
+(() => {
+ const DURACION = 480;
+ let enPantalla = null; // [{clave, y}] tal como se ve ahora
+ // con ?prueba en la dirección se registran los cuadros de la transición, para verificarla
+ const registro = new URLSearchParams(location.search).has('prueba') ? (window.registroTransicion = []) : null;
+
+ const claveLinea = l => l.et + '|' + l.c;
+
+ // Catmull-Rom sobre una serie con huecos: si el tramo toca un null, el punto queda vacío.
+ function spline(v, pos) {
+  const n = v.length; if (n === 1) return v[0];
+  const i = Math.min(Math.floor(pos), n - 2), t = pos - i;
+  const p1 = v[i], p2 = v[i + 1]; if (p1 == null || p2 == null) return null;
+  const p0 = v[Math.max(i - 1, 0)] ?? p1, p3 = v[Math.min(i + 2, n - 1)] ?? p2;
+  return p1 + 0.5 * t * (p2 - p0 + t * (2 * p0 - 5 * p1 + 4 * p2 - p3 + t * (3 * (p1 - p2) + p3 - p0)));
+ }
+ function remuestrear(v, largo) {
+  if (v.length === largo) return v.slice();
+  return Array.from({length: largo}, (_, k) => spline(v, largo > 1 ? k / (largo - 1) * (v.length - 1) : 0));
+ }
+ const foto = () => lineas.filter(l => l.y).map(l => ({clave: claveLinea(l), y: l.y.slice()}));
+
+ dibujar = function() {
+  const cv = $('#lienzo'); if (!cv) return;
+  estilosLineasV15();
+  const firma = [modo, lado, preset, comparar, vista.gran, r0, r1, [...apagados].join(), [...comparaciones].join(), verBCRA, JSON.stringify(canastas[lado])].join('|');
+  const inicial = !chartFirma, cambio = firma !== chartFirma; chartFirma = firma;
+  cancelAnimationFrame(frameChart); chartAnterior = null;
+  const origen = enPantalla, destino = foto();
+  const directo = () => {enPantalla = destino; dibujarBase();};
+  if (!cambio || arrastrando || movimientoReducido.matches || resaltado != null) return directo();
+  if (!cv.width || !cv.height || !cv.clientWidth) return directo();
+  // sin curva previa (apertura o canasta propia vacía) no hay de dónde partir
+  if (inicial || !origen?.length || !destino.length) {
+   // apertura: la curva se dibuja de izquierda a derecha, como en la v15
+   enPantalla = destino;
+   const inicio = performance.now();
+   const animar = ahora => {const p = Math.min(1, (ahora - inicio) / 650); dibujarBase(1 - Math.pow(1 - p, 3)); if (p < 1) frameChart = requestAnimationFrame(animar);};
+   frameChart = requestAnimationFrame(animar); return;
+  }
+  // cada línea nueva parte de su versión anterior; si no existía, de la serie principal anterior
+  const principalPrevia = origen.at(-1);
+  const pares = lineas.map(l => {
+   if (!l.y) return null;
+   const previa = origen.find(o => o.clave === claveLinea(l)) || principalPrevia;
+   return {l, desde: remuestrear(previa.y, l.y.length), hasta: l.y.slice()};
+  });
+  const inicio = performance.now();
+  const animar = ahora => {
+   const p = Math.min(1, Math.max(0, ahora - inicio) / DURACION), e = 1 - Math.pow(1 - p, 4);
+   pares.forEach(par => {
+    if (!par) return;
+    par.l.y = par.hasta.map((v, i) => v == null || par.desde[i] == null ? v : par.desde[i] + (v - par.desde[i]) * e);
+   });
+   enPantalla = foto();
+   if (registro) registro.push({p, largo: fechas.length, y: lineas.at(-1).y?.[Math.floor(fechas.length / 2)]});
+   dibujarBase();
+   pares.forEach(par => {if (par) par.l.y = par.hasta;});
+   if (p < 1) frameChart = requestAnimationFrame(animar); else directo();
+  };
+  frameChart = requestAnimationFrame(animar);
+ };
+})();
+// Prueba local, tanda 1 (ideas de EasyUI, MIT): cifras que ruedan por dígito, casillas que se
+// dibujan y paneles que nacen del botón que los abre. Va dentro del código del tablero, después de la v15.
+(() => {
+ // 1. Cifras: al cambiar por una acción, cada dígito que cambia rueda en su columna (Animated Number).
+ //    Los que no cambian quedan quietos. Al abrir siguen contando desde cero, como en la v15.
+ transicionCifraV15 = function(el, desdeTexto, dur = 420) {
+  if (!el || movimientoReducido.matches || arrastrando) return;
+  const final = el.textContent;
+  if (!desdeTexto || desdeTexto === final) return;
+  const a = numeroV15(desdeTexto), b = numeroV15(final);
+  const sube = !a || !b || b.v >= a.v;
+  // se comparan de derecha a izquierda, así las unidades quedan alineadas aunque cambie el largo
+  const desfase = desdeTexto.length - final.length;
+  const partes = [...final].map((ch, i) => ({ch, antes: desdeTexto[i + desfase] ?? ''}));
+  let rueda = 0;
+  const nodos = partes.map(({ch, antes}) => {
+   if (!/\d/.test(ch) || antes === ch) return document.createTextNode(ch);
+   const caja = document.createElement('span'), pista = document.createElement('span');
+   caja.className = 'rueda-v16'; pista.className = 'pista-v16 ' + (sube ? 'sube' : 'baja');
+   pista.dataset.antes = antes; pista.textContent = ch;
+   pista.style.animationDuration = dur + 'ms';
+   pista.style.animationDelay = (rueda++ * 28) + 'ms';
+   caja.append(pista); return caja;
+  });
+  if (!rueda) return;
+  el.dataset.contando = '1';
+  el.replaceChildren(...nodos);
+  setTimeout(() => {
+   // si otra acción ya cambió la cifra, se deja lo nuevo
+   if (el.textContent === final) el.textContent = final;
+   delete el.dataset.contando;
+  }, dur + rueda * 28 + 60);
+ };
+
+ // El dólar equivalente se rearma en cada cambio y pierde su valor anterior: se guarda acá.
+ let ultimoDolar = null;
+ const espejoAntesV16 = espejoDolarV15;
+ espejoDolarV15 = function() {
+  espejoAntesV16();
+  const v = document.getElementById('dolarResumenV15');
+  if (!v || v.dataset.contando) return;
+  const t = v.textContent, previo = ultimoDolar; ultimoDolar = t;
+  if (previo && previo !== t && previo !== '—' && t !== '—') transicionCifraV15(v, previo);
+ };
+
+ // 2. Casillas: el tilde se traza y la caja rebota apenas, solo en la que se acaba de tocar (Draw Checkbox).
+ //    Las listas se rearman en cada cambio, así que se busca la casilla nueva por su país.
+ document.addEventListener('change', e => {
+  const c = e.target;
+  if (!c.matches?.('.pais input[type=checkbox]') || !c.checked || movimientoReducido.matches) return;
+  const clave = c.dataset.g ? `[data-g="${CSS.escape(c.dataset.g)}"]` : c.dataset.c ? `[data-c="${CSS.escape(c.dataset.c)}"]` : null;
+  const marcar = n => {
+   if (!n || !n.checked) return;
+   n.classList.remove('trazo-v16'); void n.offsetWidth; n.classList.add('trazo-v16');
+   n.addEventListener('animationend', () => n.classList.remove('trazo-v16'), {once: true});
+  };
+  marcar(c);
+  if (clave) requestAnimationFrame(() => {const n = document.querySelector('.pais input' + clave); if (n !== c) marcar(n);});
+ }, true);
+
+ // 3. Paneles: se abren desde el botón que los llama, con un leve asentamiento de escala
+ //    (Origin Dropdown y Settle Modal). Vale para todo botón con aria-expanded y aria-controls.
+ const abrirDesde = (boton, panel) => {
+  if (movimientoReducido.matches || !panel || panel.hidden || panel.tagName === 'DETAILS' || !panel.animate) return;
+  const rb = boton.getBoundingClientRect(), rp = panel.getBoundingClientRect();
+  if (!rp.width || !rp.height) return;
+  const ox = Math.min(Math.max(rb.left + rb.width / 2 - rp.left, 0), rp.width);
+  const oy = rb.top + rb.height / 2 <= rp.top + rp.height / 2 ? 0 : rp.height;
+  panel.getAnimations().forEach(an => an.cancel());
+  panel.style.transformOrigin = `${ox}px ${oy}px`;
+  const an = panel.animate([
+   {opacity: 0, scale: '.94'},
+   {opacity: 1, scale: '1.012', offset: .6},
+   {opacity: 1, scale: '1'}
+  ], {duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)'});
+  const limpiar = () => {panel.style.transformOrigin = '';};
+  an.addEventListener('finish', limpiar, {once: true}); an.addEventListener('cancel', limpiar, {once: true});
+ };
+ new MutationObserver(cambios => cambios.forEach(({target}) => {
+  if (target.getAttribute('aria-expanded') !== 'true') return;
+  const id = target.getAttribute('aria-controls');
+  abrirDesde(target, id && document.getElementById(id));
+ })).observe(document.body, {subtree: true, attributes: true, attributeFilter: ['aria-expanded'], attributeOldValue: false});
+ // «Agregar comparación» es un plegable: se anima su contenido desde el rótulo
+ document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (!d.open || !d.matches?.('details.panel-comparaciones')) return;
+  const rotulo = d.querySelector(':scope>summary'), contenido = d.querySelector(':scope>.contenido-comparaciones');
+  if (rotulo && contenido) abrirDesde(rotulo, contenido);
+ }, true);
+})();
+// Prueba local, tanda 2: el dólar equivalente que sigue al cursor. Va dentro del código del tablero, después de la tanda 1.
+(() => {
+ // Dólar equivalente que sigue al cursor. Al recorrer la curva, la celda azul muestra la cotización
+ //    que haría falta para volver al TCRM de esa fecha, con la misma cuenta del «Cómo se calcula».
+ //    Al salir vuelve a su referencia (el promedio o la fecha fijada con un clic).
+ let cursorDolar = null;
+ const mesLargo = f => new Intl.DateTimeFormat('es-AR', {month: 'long', timeZone: 'UTC'}).format(new Date(f + 'T00:00:00Z'));
+ const poner = (el, t) => {if (el && el.textContent !== t) el.textContent = t;};
+ function dolarDelCursor(i) {
+  const guia = $('#resumenPrincipal .cifra-dolar'), valor = $('#dolarResumenV15');
+  const a = modeloActual, v = lineas.at(-1)?.y?.[i], f = fechas[i];
+  if (!guia || !valor || !a?.actual || a.dolar == null || v == null || !f) return false;
+  const eq = a.dolar * v / a.actual, mov = (v / a.actual - 1) * 100;
+  delete valor.dataset.contando;
+  poner(valor, pesos(eq));
+  poner(guia.querySelector('.n:not(.cotizacion-resumen)'), 'Para volver al TCRM ' + (vista.gran === 'mensual' ? 'promedio de ' + mesLargo(f) + ' ' + f.slice(0, 4) : 'del ' + fechaCorta(f)));
+  poner(guia.querySelector('.cotizacion-resumen')?.firstElementChild,
+   (Math.abs(mov) < .05 ? 'En línea con el' : Math.abs(mov).toFixed(1).replace('.', ',') + '% ' + (mov > 0 ? 'por encima' : 'por debajo') + ' del') + ' dólar observado');
+  guia.classList.add('sigue-cursor');
+  return true;
+ }
+ const restaurar = () => {
+  if (cursorDolar == null) return;
+  cursorDolar = null;
+  $('#resumenPrincipal .cifra-dolar')?.classList.remove('sigue-cursor');
+  $('#tip')?.classList.remove('sin-dolar');
+  espejoDolarV15();
+ };
+ const espejoTanda1 = espejoDolarV15;
+ espejoDolarV15 = function() {if (cursorDolar != null && dolarDelCursor(cursorDolar)) return; espejoTanda1();};
+ const tipTanda1 = tipEn;
+ tipEn = function(i) {
+  const r = tipTanda1(i);
+  if (r && puntoFijadoV9 === null && dolarDelCursor(i)) {
+   cursorDolar = i;
+   // en escritorio la celda ya dice el dólar: la lectura no lo repite
+   $('#tip')?.classList.toggle('sin-dolar', !pantallaAngosta.matches);
+  } else restaurar();
+  return r;
+ };
+ const ocultarTanda1 = ocultarLecturaV9;
+ ocultarLecturaV9 = function() {ocultarTanda1(); restaurar();};
+ const finalizarTanda1 = finalizarActualizacion;
+ finalizarActualizacion = function() {cursorDolar = null; finalizarTanda1();};
+})();
+// Prueba local, tanda 3: la fecha del cursor en el gráfico usa los colores de la celda del dólar
+// (azul noche con texto celeste), así se ve que la celda depende del punto que se está leyendo.
+// Repinta la píldora de la v15 con la misma geometría.
+(() => {
+ const dibujarBaseTanda2 = dibujarBase;
+ dibujarBase = function(progreso = 1) {
+  dibujarBaseTanda2(progreso);
+  const i = puntoFijadoV9 ?? resaltado;
+  if (progreso < 1 || i == null || !mapaX || !fechas[i]) return;
+  const cv = $('#lienzo'), cx = cv.getContext('2d'), {X, m, H, pw} = mapaX;
+  const [a, mes, d] = fechas[i].split('-');
+  const texto = vista.gran === 'diario' ? +d + ' ' + MESES[+mes - 1] + ' ' + a : MESES[+mes - 1] + ' ' + a;
+  const oscuro = document.documentElement.dataset.theme === 'dark';
+  cx.save(); cx.font = '600 12px ' + getComputedStyle(document.body).fontFamily;
+  const an = cx.measureText(texto).width + 16, alto = 20;
+  const x = Math.max(m.l, Math.min(m.l + pw - an, X(i) - an / 2)), y = H - alto - 2;
+  cx.fillStyle = oscuro ? '#0a2448' : '#0A3F86'; cx.beginPath();
+  if (cx.roundRect) cx.roundRect(x - .5, y - .5, an + 1, alto + 1, 10.5); else cx.rect(x - .5, y - .5, an + 1, alto + 1);
+  cx.fill();
+  if (oscuro) {cx.strokeStyle = 'rgba(169,212,255,.45)'; cx.lineWidth = 1; cx.stroke();}
+  cx.fillStyle = '#A9D4FF'; cx.textAlign = 'center'; cx.fillText(texto, x + an / 2, y + 14);
+  cx.restore();
+ };
+})();

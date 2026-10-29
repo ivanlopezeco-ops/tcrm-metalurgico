@@ -29,6 +29,8 @@ const check=(ok,s)=>{assert(ok,s);checks.push(s)};
    check(await p.locator('#bImpo').evaluate(e=>e.getBoundingClientRect().height>=44),'Selector accesible al toque '+width+' '+theme);
    check(await p.locator('.selector-flujo').evaluate(e=>e.getBoundingClientRect().bottom<innerHeight),'Canasta visible sin bajar '+width+' '+theme);
    await p.locator('.ayuda-flujo').click();check(await p.locator('.ayuda-flujo').getAttribute('aria-expanded')==='true','Ayuda fijada por clic o toque '+width+' '+theme);
+   // la ayuda se abre creciendo desde su botón: se mide quieta, al terminar la animación
+   await p.locator('#ayudaFlujoV13').evaluate(e=>Promise.all(e.getAnimations().map(a=>a.finished)));
    check(await p.locator('#ayudaFlujoV13').evaluate(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}),'Ayuda contenida en la pantalla '+width+' '+theme);
    await p.locator('.ayuda-flujo').click();check(!(await p.locator('#ayudaFlujoV13').isVisible()),'Segundo toque cierra la ayuda '+width+' '+theme);
    await p.locator('.ayuda-flujo').click();
